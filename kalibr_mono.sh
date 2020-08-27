@@ -9,12 +9,11 @@ cam_model=pinhole-equi
 output_folder=$1
 
 # result file
-filename=monocular_left
-# filename=monocular_right
+filename=monocular
 
-target_file=/media/ziqianbai/DATA/CALIBRATION/script/april_6x6_80x80cm.yaml
-data_path=/media/ziqianbai/DATA/CALIBRATION/kalibr/cams/data/.
-result_path=/media/ziqianbai/DATA/CALIBRATION/kalibr/cams/result
+target_file=/home/ziqianbai/Projects/vlab/kalibr_calibration/april_6x6_80x80cm.yaml
+data_path=/home/ziqianbai/DATA_TEMP/kalibr/cams/data/.
+result_path=/home/ziqianbai/DATA_TEMP/kalibr/cams/result
 bag_file=${result_path}/output.bag
 
 # create folder
@@ -28,21 +27,15 @@ echo "create bag"
 echo "kalibr_bagcreater --folder ${data_path} --output-bag ${bag_file}"
 kalibr_bagcreater --folder ${data_path} --output-bag ${bag_file}
 
-cd ${result_path}
+cd "${result_path}"
 
 # calibrate monocular camera
-if [ ${filename} = "monocular_left" ]; then
+if [ ${filename} = "monocular" ]; then
     echo "calib left camera"
     echo "kalibr_calibrate_cameras --target ${target_file} --dont-show-report \
     --bag ${bag_file} --models ${cam_model} --topics /cam0/image_raw"
     kalibr_calibrate_cameras --target ${target_file} --dont-show-report \
-        --bag ${bag_file} --models ${cam_model} --topics /cam0/image_raw --show-extraction
-elif [ ${filename} = "monocular_right" ]; then
-    echo "calib right camera"
-    echo "kalibr_calibrate_cameras --target ${target_file} --dont-show-report \
-    --bag ${bag_file} --models ${cam_model} --topics /cam1/image_raw"
-    kalibr_calibrate_cameras --target ${target_file} --dont-show-report \
-        --bag ${bag_file} --models ${cam_model} --topics /cam1/image_raw --show-extraction
+        --bag ${bag_file} --models ${cam_model} --topics /cam0/image_raw #--show-extraction
 fi
 
 cp ${result_path}/*.yaml ${output_folder}/${filename}.yaml

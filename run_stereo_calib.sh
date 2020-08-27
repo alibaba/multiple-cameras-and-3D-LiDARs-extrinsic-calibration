@@ -8,8 +8,13 @@ if [ $# != 1 ]; then
     exit 1
 fi
 
+input_folder=${dataset_folder}
+output_folder=${dataset_folder}
+target_ros_data_path=/home/ziqianbai/DATA_TEMP/kalibr/cams/data
+workspace_folder=/home/ziqianbai/Projects/vlab/kalibr_calibration
+
 # an executable python program----list_image.py
-python_list_image_path=list_images.py
+python_list_image_path=${workspace_folder}/list_images.py
 # check input up/low folder and images
 for element in $(ls ${dataset_folder}); do
     dir_or_file=$1"/"${element}
@@ -40,10 +45,6 @@ if [ ! -f "${img_list_txt}" ]; then
 fi
 # copy image list file to dataset folder
 cp ${img_list_txt} ${dataset_folder}
-
-input_folder=${dataset_folder}
-output_folder=${dataset_folder}
-target_ros_data_path=/media/ziqianbai/DATA/CALIBRATION/kalibr/cams/data
 
 # run kalibr script
 ./prepare_kalibr.py ${input_folder} ${output_folder} ${input_folder}/image_list.txt --target_data_path ${target_ros_data_path} --cam_model stereo

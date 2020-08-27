@@ -8,11 +8,11 @@ if [ $# != 1 ]; then
     exit 1
 fi
 
-workspace_folder=/media/ziqianbai/DATA/CALIBRATION/script
+workspace_folder=/home/ziqianbai/Projects/vlab/kalibr_calibration
 input_folder=${dataset_folder}
 output_folder=${dataset_folder}
-target_ros_data_path=/media/ziqianbai/DATA/CALIBRATION/kalibr/cams/data
-imu_raw_data_path=/media/ziqianbai/DATA/CALIBRATION/camera-IMU/backpack1_2020-0707/0707_2/imu_0.txt
+target_ros_data_path=/home/ziqianbai/DATA_TEMP/kalibr/cams/data
+imu_raw_data_path=/home/ziqianbai/DATA_TEMP/CALIBRATION/camera_imu/backpack1/20200708/0708_1/imu_0.txt
 
 # an executable python program----list_image.py
 python_list_image_path=${workspace_folder}/list_images.py
@@ -52,6 +52,7 @@ if [ ! -f "${img_list_txt}" ]; then
     echo "${img_list_txt} is no exist!"
     exit
 fi
+
 # copy image list file to dataset folder
 cp ${img_list_txt} ${dataset_folder}
 

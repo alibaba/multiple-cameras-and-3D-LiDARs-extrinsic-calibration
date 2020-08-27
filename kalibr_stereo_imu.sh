@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-target_file=/media/ziqianbai/DATA/CALIBRATION/script/april_6x6_80x80cm.yaml
-data_path=/media/ziqianbai/DATA/CALIBRATION/kalibr/cams/data/.
-result_path=/media/ziqianbai/DATA/CALIBRATION/kalibr/cams/result
+target_file=/home/ziqianbai/Projects/vlab/kalibr_calibration/april_6x6_80x80cm.yaml
+data_path=/home/ziqianbai/DATA_TEMP/kalibr/cams/data/.
+result_path=/home/ziqianbai/DATA_TEMP/kalibr/cams/result
 bag_file=${result_path}/output.bag
-imu_intrinsic_file=/media/ziqianbai/DATA/CALIBRATION/backpack/backpack1_imu_xsens.yaml
-stereo_extrinsic_file=/media/ziqianbai/DATA/CALIBRATION/AprilTag/2020-0707/left_00E35151666_00E35151671/20200707-095258/stereo_result.yaml
+imu_intrinsic_file=/home/ziqianbai/DATA_TEMP/CALIBRATION/imu/backpack5/2020-0811/backpack5_imu.yaml
+stereo_extrinsic_file=/home/ziqianbai/DATA_TEMP/CALIBRATION/stereo/backpack1/20200707/left_stereo_00E35151666_00E35151671/20200707-094559/stereo.yaml
 # output folder
 output_folder=$1
 

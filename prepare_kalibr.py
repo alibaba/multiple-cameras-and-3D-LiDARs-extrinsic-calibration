@@ -54,10 +54,6 @@ def main():
                         type=str,
                         default='right',
                         help='right cam folder')
-    parser.add_argument('--imu_file',
-                        type=str,
-                        default='imu0_0.txt',
-                        help='imu file path')
     parser.add_argument('--target_data_path',
                         type=str,
                         default='data',
@@ -73,12 +69,16 @@ def main():
     imagelist_file = args.imagelist_file
     l_folder = args.l_folder
     r_folder = args.r_folder
-    # imu_file = args.imu_file
     dataset_path = args.target_data_path
     cam_model = args.cam_model
 
-    l_folder = os.path.join(input_dir, l_folder)
-    r_folder = os.path.join(input_dir, r_folder)
+    if cam_model == 'mono':
+        l_folder = os.path.join(input_dir, "data")
+    elif cam_model == 'stereo':
+        l_folder = os.path.join(input_dir, l_folder)
+        r_folder = os.path.join(input_dir, r_folder)
+    else:
+        sys.exit("Invalid camera model!")
 
     # mkdir
     dataset_cam0_path = os.path.join(dataset_path, 'cam0')
@@ -89,7 +89,8 @@ def main():
     os.makedirs(dataset_cam0_path)
     if os.path.exists(dataset_cam1_path):
         shutil.rmtree(dataset_cam1_path)
-    os.makedirs(dataset_cam1_path)
+    if cam_model == "stereo":
+        os.makedirs(dataset_cam1_path)
 
     # import imagelist
     with open(imagelist_file, 'r') as in_file:
@@ -98,17 +99,19 @@ def main():
 
         for img_name in img_names:
             l_img_path = os.path.join(l_folder, img_name)
-            r_img_path = os.path.join(r_folder, img_name)
             ts = int(time.time() * 1e9)
             l_img_dst_path = os.path.join(
                 dataset_cam0_path, str(ts) + '.' + img_name.split(".")[1])
-            r_img_dst_path = os.path.join(
-                dataset_cam1_path, str(ts) + '.' + img_name.split(".")[1])
-            print(l_img_dst_path)
-            print(r_img_dst_path)
             shutil.copyfile(l_img_path, l_img_dst_path)
-            shutil.copyfile(r_img_path, r_img_dst_path)
+
+            if cam_model == "stereo":
+                r_img_path = os.path.join(r_folder, img_name)
+                r_img_dst_path = os.path.join(
+                    dataset_cam1_path, str(ts) + '.' + img_name.split(".")[1])
+                shutil.copyfile(r_img_path, r_img_dst_path)
             time.sleep(0.03)
+            # print(l_img_dst_path)
+            # print(r_img_dst_path)
 
     cmds = []
     if cam_model == "stereo":
