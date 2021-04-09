@@ -38,8 +38,9 @@ def common_arg_parser():
 
 
 def sort_by_suffix(img_name_1):
-    ext_1 = [e for e in img_name_1.split("_") if e.endswith(".png")][0]
+    ext_1 = [e for e in img_name_1.split("_") if e.endswith(".jpg")][0]
     timestamp_1 = ext_1[:-4]
+
     if timestamp_1.isdigit():
         return int(timestamp_1)
     return int(timestamp_1[1:])
@@ -58,7 +59,7 @@ if __name__ == "__main__":
     image_files = [
         f
         for f in files
-        if os.path.isfile(os.path.join(input_folder, f)) and f.endswith(".png")
+        if os.path.isfile(os.path.join(input_folder, f)) and f.endswith(".jpg")
     ]
 
     sorted_image_files = sorted(image_files, key=sort_by_suffix)
@@ -67,8 +68,7 @@ if __name__ == "__main__":
     img_idx = 0
     with open(output_file, "w") as output:
         for s in sorted_image_files:
-            new_img_name = "image_{}.png".format(img_idx)
-            print(new_img_name)
+            new_img_name = "image_{}.jpg".format(img_idx)
             img_idx += 1
 
             old_img_abs_path = os.path.join(input_folder, s)

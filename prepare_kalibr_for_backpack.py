@@ -107,12 +107,14 @@ def main():
         os.remove(new_imu_file)
 
     img_timestamps = {}
+    # image timestamp is the unit of second
     with open(image_ts_file, 'r') as img_ts_fd:
         for line in img_ts_fd:
             if(len(line) > 0):
                 img_ts = line.split()
-                img_timestamps[img_ts[2]] = str(int(float(img_ts[0])))+'000'
+                img_timestamps[img_ts[2]] = str(int(float(img_ts[0]) * 1000000))+'000'
 
+    img_start_timestamps = float(img_timestamps['0'])/1000000
     new_imu_datas = []
 
     with open(imu_file, 'r') as imu_fd:
@@ -125,7 +127,6 @@ def main():
             img_names = img_fd.readlines()
             img_names = [x.strip() for x in img_names]
 
-            # img_ts_0 = int(float(imu_datas[0].split()[0]))
             for img_name in img_names:
                 l_img_path = os.path.join(l_folder, img_name)
                 r_img_path = os.path.join(r_folder, img_name)
@@ -136,22 +137,17 @@ def main():
                 r_img_dst_path = os.path.join(
                     dataset_cam1_path, img_timestamps[img_frame_num] + '.' + img_name.split(".")[1])
 
-                # img_ts = img_ts_0 * 1000000
-                # l_img_dst_path = os.path.join(
-                #     dataset_cam0_path, str(img_ts) + '.' + img_name.split(".")[1])
-                # r_img_dst_path = os.path.join(
-                #     dataset_cam1_path, str(img_ts) + '.' + img_name.split(".")[1])
-                # img_ts_0 = img_ts_0+200
-
-                print(l_img_dst_path)
-                print(r_img_dst_path)
                 shutil.copyfile(l_img_path, l_img_dst_path)
-                shutil.copyfile(r_img_path, r_img_dst_path)
+                if cam_model == "stereo_imu":
+                    shutil.copyfile(r_img_path, r_img_dst_path)
 
         for imu_data in imu_datas:
             new_imu_data = imu_data.split()
-            new_imu_tuple = (int(float(new_imu_data[0]))*1000000, new_imu_data[4], new_imu_data[5],
-                             new_imu_data[6], new_imu_data[1], new_imu_data[2], new_imu_data[3])
+            imu_timestamp = float(new_imu_data[0])
+            # if imu_timestamp >= img_start_timestamps:
+            print("imu_timestamp: {}".format(imu_timestamp))
+            new_imu_tuple = (int(imu_timestamp*1000000), new_imu_data[4], new_imu_data[5],
+                            new_imu_data[6], new_imu_data[1], new_imu_data[2], new_imu_data[3])
             new_imu_datas.append(new_imu_tuple)
 
     # write imu.csv
@@ -162,11 +158,13 @@ def main():
 
     cmds = []
     if cam_model == "stereo":
-        cmds = ['./kalibr_stereo.sh', output_dir]
+        cmds = ['./kalibr_stereo.sh', dataset_path, output_dir]
     elif cam_model == "mono":
-        cmds = ['./kalibr_mono.sh', output_dir]
+        cmds = ['./kalibr_mono.sh', dataset_path, output_dir]
     elif cam_model == "stereo_imu":
-        cmds = ['./kalibr_stereo_imu.sh', output_dir]
+        cmds = ['./kalibr_stereo_imu.sh', dataset_path, output_dir]
+    elif cam_model == "mono_imu":
+        cmds = ['./kalibr_mono_imu.sh', dataset_path, output_dir]
     else:
         sys.exit("Invalid camera model!")
 
