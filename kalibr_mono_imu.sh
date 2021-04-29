@@ -33,11 +33,10 @@ cd ${result_path}
 
 # calibrate camera-IMU
 echo "calib camera-IMU"
-echo "kalibr_calibrate_imu_camera --bag ${ros_bag_file} --target ${target_file} --cam ${mono_camera_file} --imu ${imu_intrinsic_file}"
-kalibr_calibrate_imu_camera --bag ${ros_bag_file} --target ${target_file} --cams ${mono_camera_file} --imu ${imu_intrinsic_file} --time-calibration
+echo "kalibr_calibrate_imu_camera --bag ${ros_bag_file} --target ${target_file} --cams ${mono_camera_file} --imu ${imu_intrinsic_file} --dont-show-report"
+kalibr_calibrate_imu_camera --bag ${ros_bag_file} --target ${target_file} --cams ${mono_camera_file} --imu ${imu_intrinsic_file} --dont-show-report
 # --recompute-camera-chain-extrinsics #--bag-from-to 11 121   --show-extraction
 
 mv ${result_path}/*.yaml ${output_folder}/
 mv ${result_path}/*.pdf ${output_folder}/
 mv ${result_path}/*.txt ${output_folder}/
-mv ${ros_bag_file} ${output_folder}/

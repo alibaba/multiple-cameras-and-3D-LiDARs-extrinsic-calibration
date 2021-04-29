@@ -11,8 +11,8 @@ fi
 workspace_folder=/home/ziqianbai/Projects/vlab/kalibr_calibration
 input_folder=${dataset_folder}
 output_folder=${dataset_folder}
-target_ros_data_path=/home/ziqianbai/DATA_TEMP/kalibr/cams/data
-imu_raw_data_path=/home/ziqianbai/DATA_TEMP/CALIBRATION/camera_imu/backpack1/20200708/0708_1/imu_0.txt
+target_ros_data_path=/media/ziqianbai/DATA/kalibr/cams/data
+imu_raw_data_path=${dataset_folder}/imu_0.txt
 
 # an executable python program----list_image.py
 python_list_image_path=${workspace_folder}/list_images.py
@@ -31,16 +31,17 @@ input_right_img_folder=${dataset_folder}"/right"
 
 cd ${input_left_img_folder}
 rename "s/0_/image_/" *
+cp timestamp_0.txt ${dataset_folder}/image_timestamp.txt
 
 cd ${input_right_img_folder}
-rename "s/1_/image_/" *
+rename "s/3_/image_/" *
 
-cd ${workspace_folder}
+
 
 # create image_lists.txt for left images and right images
 echo "Prepare left and right image list file!"
-python ${python_list_image_path} -i ${input_left_img_folder} -o ${input_left_img_folder}
-python ${python_list_image_path} -i ${input_right_img_folder} -o ${input_right_img_folder}
+python ${python_list_image_path} -i ${input_left_img_folder} -o ${input_left_img_folder} -r
+python ${python_list_image_path} -i ${input_right_img_folder} -o ${input_right_img_folder} -r
 # check image_lists.txt
 img_list_txt=${input_left_img_folder}"/image_list.txt"
 if [ ! -f "${img_list_txt}" ]; then
@@ -57,5 +58,6 @@ fi
 cp ${img_list_txt} ${dataset_folder}
 
 # run kalibr script
+cd ${workspace_folder}
 ./prepare_kalibr_for_backpack.py ${input_folder} ${output_folder} ${input_folder}/image_list.txt ${imu_raw_data_path} \
     --target_data_path ${target_ros_data_path} --cam_model stereo_imu

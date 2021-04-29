@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # camera distortion model
-# cam_model=pinhole-radtan
-cam_model=pinhole-equi
+cam_model=pinhole-radtan
+# cam_model=pinhole-equi
 # cam_model=omni-radtan
 
 # output folder
@@ -11,9 +11,9 @@ output_folder=$1
 # result file
 filename=monocular
 
-target_file=/home/ziqianbai/Projects/vlab/kalibr_calibration/april_6x6_80x80cm.yaml
-data_path=/home/ziqianbai/DATA_TEMP/kalibr/cams/data/.
-result_path=/home/ziqianbai/DATA_TEMP/kalibr/cams/result
+target_file=/home/ziqianbai/Projects/vlab/kalibr_calibration/checkerboard_8x6_3x3cm.yaml
+data_path=/media/ziqianbai/DATA/kalibr/cams/data/.
+result_path=/media/ziqianbai/DATA/kalibr/cams/result
 bag_file=${result_path}/output.bag
 
 # create folder

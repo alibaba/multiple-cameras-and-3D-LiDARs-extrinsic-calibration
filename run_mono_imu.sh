@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
 dataset_folder=$1
+imu_yaml_file=$2
+cams_chain_yaml_file=$3
 
-if [ $# != 1 ]; then
-    echo "USAGE: $0 dataset_folder"
-    echo " e.g.: $0 /dataset_folder"
+if [ $# != 3 ]; then
+    echo "USAGE: $0 [dataset_folder] [imu_yaml_file] [cams_chain_yaml_file]"
+    echo " e.g.: $0 [dataset_folder] [imu_yaml_file] [cams_chain_yaml_file]"
     exit 1
 fi
 
@@ -39,4 +41,4 @@ cp ${input_left_img_folder}"/image_list.txt" ${img_list_txt}
 # run kalibr script
 cd ${workspace_folder}
 ./prepare_kalibr_for_backpack.py ${input_folder} ${output_folder} ${img_list_txt} ${imu_raw_data_path} \
-    --target_data_path ${target_ros_data_path} --cam_model mono_imu
+    --target_data_path ${target_ros_data_path} --cam_model mono_imu --imu_yaml ${imu_yaml_file}  --cams_chain ${cams_chain_yaml_file}

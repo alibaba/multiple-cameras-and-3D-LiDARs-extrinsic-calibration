@@ -10,7 +10,7 @@ fi
 
 input_folder=${dataset_folder}
 output_folder=${dataset_folder}
-target_ros_data_path=/home/ziqianbai/DATA_TEMP/kalibr/cams/data
+target_ros_data_path=/media/ziqianbai/DATA/kalibr/cams/data
 workspace_folder=/home/ziqianbai/Projects/vlab/kalibr_calibration
 
 # an executable python program----list_image.py
@@ -26,7 +26,13 @@ for element in $(ls ${dataset_folder}); do
 done
 
 input_left_img_folder=${dataset_folder}"/left"
+cd ${input_left_img_folder}
+rename "s/-/_/" *
+
 input_right_img_folder=${dataset_folder}"/right"
+cd ${input_right_img_folder}
+rename "s/-/_/" *
+
 
 # create image_lists.txt for up images and low images
 echo "Prepare up and low image list file!"
@@ -47,4 +53,5 @@ fi
 cp ${img_list_txt} ${dataset_folder}
 
 # run kalibr script
+cd ${workspace_folder}
 ./prepare_kalibr.py ${input_folder} ${output_folder} ${input_folder}/image_list.txt --target_data_path ${target_ros_data_path} --cam_model stereo

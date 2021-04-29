@@ -34,18 +34,46 @@ def main():
     """
     parser = argparse.ArgumentParser(
         description='A script to parse raw data')
-    parser.add_argument('input_dir', type=str, default='', help='the stereo dataset directory to be processed')
-    parser.add_argument('output_dir', type=str, default='', help='the stereo param result')
-    parser.add_argument('imagelist_file', type=str, default='', help='imagelist')
-    parser.add_argument('imu_file', type=str, default='imu0_0.txt', help='raw imu data path')
-    parser.add_argument('--image_timestamp_file', type=str, default='image_timestamp.txt', help='image timestamp file')
-    parser.add_argument('--imu_timestamp_file', type=str, default='imu_tiemstamp.txt', help='imu timestamp file')
-    parser.add_argument('--l_folder', type=str, default='left', help='left cam folder')
-    parser.add_argument('--r_folder', type=str, default='right', help='right cam folder')
-    parser.add_argument('--target_data_path', type=str, default='data', help='target ros data path')
-    parser.add_argument('--cam_model', type=str, default='mono', help='camera model: monocular or stereo or stereo_imu')
-    parser.add_argument('--imu_yaml', type=str, default="", help=" imu intrinsic file" )
-    parser.add_argument('--cams_chain_yaml', type=str, default="", help=" cams chain file" )
+    parser.add_argument('input_dir',
+                        type=str,
+                        default='',
+                        help='the stereo dataset directory to be processed')
+    parser.add_argument('output_dir',
+                        type=str,
+                        default='',
+                        help='the stereo param result')
+    parser.add_argument('imagelist_file',
+                        type=str,
+                        default='',
+                        help='imagelist')
+    parser.add_argument('imu_file',
+                        type=str,
+                        default='imu0_0.txt',
+                        help='raw imu data path')
+    parser.add_argument('--image_timestamp_file',
+                        type=str,
+                        default='image_timestamp.txt',
+                        help='image timestamp file')
+    parser.add_argument('--imu_timestamp_file',
+                        type=str,
+                        default='imu_tiemstamp.txt',
+                        help='imu timestamp file')
+    parser.add_argument('--l_folder',
+                        type=str,
+                        default='left',
+                        help='left cam folder')
+    parser.add_argument('--r_folder',
+                        type=str,
+                        default='right',
+                        help='right cam folder')
+    parser.add_argument('--target_data_path',
+                        type=str,
+                        default='data',
+                        help='target ros data path')
+    parser.add_argument('--cam_model',
+                        type=str,
+                        default='mono',
+                        help='camera model: monocular or stereo or stereo_imu')
 
     args = parser.parse_args()
     input_dir = args.input_dir
@@ -58,8 +86,6 @@ def main():
     r_folder = args.r_folder
     dataset_path = args.target_data_path
     cam_model = args.cam_model
-    imu_yaml = args.imu_yaml
-    cams_chain_yaml = args.cams_chain_yaml
 
     l_folder = os.path.join(input_dir, l_folder)
     r_folder = os.path.join(input_dir, r_folder)
@@ -81,12 +107,11 @@ def main():
         os.remove(new_imu_file)
 
     img_timestamps = {}
-    # image timestamp is the unit of second
     with open(image_ts_file, 'r') as img_ts_fd:
         for line in img_ts_fd:
             if(len(line) > 0):
                 img_ts = line.split()
-                img_timestamps[img_ts[2]] = str(int(float(img_ts[0]) * 1000000))+'000'
+                img_timestamps[img_ts[2]] = str(int(float(img_ts[0])))+'000'
 
     img_start_timestamps = float(img_timestamps['0'])/1000000
     new_imu_datas = []
@@ -111,18 +136,19 @@ def main():
                 r_img_dst_path = os.path.join(
                     dataset_cam1_path, img_timestamps[img_frame_num] + '.' + img_name.split(".")[1])
 
+                # print(l_img_dst_path)
+                # print(r_img_dst_path)
                 shutil.copyfile(l_img_path, l_img_dst_path)
-                if cam_model == "stereo_imu":
+                if cam_model == "mono_imu":
                     shutil.copyfile(r_img_path, r_img_dst_path)
 
         for imu_data in imu_datas:
             new_imu_data = imu_data.split()
             imu_timestamp = float(new_imu_data[0])
-            # if imu_timestamp >= img_start_timestamps:
-            print("imu_timestamp: {}".format(imu_timestamp))
-            new_imu_tuple = (int(imu_timestamp*1000000), new_imu_data[4], new_imu_data[5],
-                            new_imu_data[6], new_imu_data[1], new_imu_data[2], new_imu_data[3])
-            new_imu_datas.append(new_imu_tuple)
+            if imu_timestamp >= img_start_timestamps:
+                new_imu_tuple = (int(imu_timestamp*1000000), new_imu_data[4], new_imu_data[5],
+                                new_imu_data[6], new_imu_data[1], new_imu_data[2], new_imu_data[3])
+                new_imu_datas.append(new_imu_tuple)
 
     # write imu.csv
     with open(new_imu_file, 'w') as f:
@@ -132,13 +158,13 @@ def main():
 
     cmds = []
     if cam_model == "stereo":
-        cmds = ['./kalibr_stereo.sh', dataset_path, output_dir]
+        cmds = ['./kalibr_stereo.sh', output_dir]
     elif cam_model == "mono":
-        cmds = ['./kalibr_mono.sh', dataset_path, output_dir]
+        cmds = ['./kalibr_mono.sh', output_dir]
     elif cam_model == "stereo_imu":
-        cmds = ['./kalibr_stereo_imu.sh', dataset_path, output_dir, imu_yaml, cams_chain_yaml]
+        cmds = ['./kalibr_stereo_imu.sh', output_dir]
     elif cam_model == "mono_imu":
-        cmds = ['./kalibr_mono_imu.sh', dataset_path, output_dir, imu_yaml, cams_chain_yaml]
+        cmds = ['./kalibr_mono_imu.sh', output_dir]
     else:
         sys.exit("Invalid camera model!")
 

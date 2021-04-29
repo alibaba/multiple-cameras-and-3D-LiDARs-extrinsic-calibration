@@ -10,7 +10,7 @@ fi
 
 input_folder=${dataset_folder}
 output_folder=${dataset_folder}
-target_ros_data_path=/home/ziqianbai/DATA_TEMP/kalibr/cams/data
+target_ros_data_path=/media/ziqianbai/DATA/kalibr/cams/data
 workspace_folder=/home/ziqianbai/Projects/vlab/kalibr_calibration
 
 # an executable python program----list_image.py

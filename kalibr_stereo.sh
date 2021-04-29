@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 target_file=/home/ziqianbai/Projects/vlab/kalibr_calibration/april_6x6_80x80cm.yaml
-data_path=/home/ziqianbai/DATA_TEMP/kalibr/cams/data/.
-result_path=/home/ziqianbai/DATA_TEMP/kalibr/cams/result
+data_path=/media/ziqianbai/DATA/kalibr/cams/data/.
+result_path=/media/ziqianbai/DATA/kalibr/cams/result
 bag_file=${result_path}/output.bag
 
 # output folder
@@ -33,7 +33,7 @@ echo "calib stereo cameras"
 echo "kalibr_calibrate_cameras --target ${target_file} --dont-show-report \
     --bag ${bag_file} --models ${cam_model} ${cam_model} --topics /cam0/image_raw /cam1/image_raw"
 kalibr_calibrate_cameras --target ${target_file} --dont-show-report \
-    --bag ${bag_file} --models ${cam_model} ${cam_model} --topics /cam0/image_raw /cam1/image_raw #--plot
+    --bag ${bag_file} --models ${cam_model} ${cam_model} --topics /cam0/image_raw /cam1/image_raw #--show-extraction
 
 cp ${result_path}/*.yaml ${output_folder}/${filename}.yaml
 cp ${result_path}/*.pdf ${output_folder}/${filename}.pdf
