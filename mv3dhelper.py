@@ -209,13 +209,11 @@ def sort_rename_images(input_folder, raw_prefix, out_prefix, extension):
     :param extension: e.g. .jpg or .png
     :return: the sorted image name list.
     """
-    img_names = [img for img in os.listdir(
-        input_folder) if img.endswith(extension)]
-
+    img_names = [img for img in os.listdir(input_folder) if img.endswith(extension)]
     def sort_by_suffix(img_name):
-        delim_pattern = r'_|.'
+        delim_pattern = '\_|\.'
         spot_idx = re.split(delim_pattern, img_name)[1]
-        print('spot_idx: {}'.format(spot_idx))
+        # print('spot_idx: {}'.format(spot_idx))
         return int(spot_idx)
 
     sorted_img_names = sorted(img_names, key=sort_by_suffix)
@@ -225,7 +223,7 @@ def sort_rename_images(input_folder, raw_prefix, out_prefix, extension):
     #         input_folder, sorted_img_names[idx])
     #     new_img_abs_path = os.path.join(input_folder, new_img_name)
     #     os.rename(old_img_abs_path, new_img_abs_path)
-    return sort_rename_images
+    return sorted_img_names
 
 
 class SpotMetaItem:
