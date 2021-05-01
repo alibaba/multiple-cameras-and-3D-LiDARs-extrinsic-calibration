@@ -57,8 +57,7 @@ if __name__ == "__main__":
 
     # target filepath
     if args.target_type == 'checkerboard':
-        target_filepath = os.path.join(
-            ws_folder, 'checkerboard_8x11_3x3cm.yaml')
+        target_filepath = os.path.join(ws_folder, 'checkerboard_8x11_3x3cm.yaml')
     elif args.target_type == 'apriltag':
         target_filepath = os.path.join(ws_folder, 'april_6x6_80x80cm.yaml')
     else:
@@ -87,13 +86,11 @@ if __name__ == "__main__":
 
     # sort image
     cam0_img_prefix = str(cam0_idx)+'_'
-    cam0_img_list = mv3dhelper.sort_rename_images(
-        raw_cam0_folder, cam0_img_prefix, 'image_', img_extension)
+    cam0_img_list = mv3dhelper.sort_rename_images(raw_cam0_folder, cam0_img_prefix, 'image_', img_extension)
     if cam_type == 'stereo':
         if os.path.exists(raw_cam1_folder):
             cam1_img_prefix = str(cam1_idx) + '_'
-            cam1_img_list = mv3dhelper.sort_rename_images(
-                raw_cam1_folder, cam1_img_prefix, 'image_', img_extension)
+            cam1_img_list = mv3dhelper.sort_rename_images(raw_cam1_folder, cam1_img_prefix, 'image_', img_extension)
 
     # rename images according to timestamp
     out_cam0_folder = os.path.join(output_folder, 'data/cam0')
@@ -118,10 +115,8 @@ if __name__ == "__main__":
         print(dst_img0_path)
 
         if cam_type == "stereo":
-            src_img1_path = os.path.join(
-                raw_cam1_folder, cam1_img_list[img_idx])
-            dst_img1_path = os.path.join(
-                out_cam1_folder, str(ts) + img_extension)
+            src_img1_path = os.path.join(raw_cam1_folder, cam1_img_list[img_idx])
+            dst_img1_path = os.path.join(out_cam1_folder, str(ts) + img_extension)
             shutil.copyfile(src_img1_path, dst_img1_path)
         time.sleep(0.01)
 

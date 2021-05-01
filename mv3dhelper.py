@@ -209,7 +209,9 @@ def sort_rename_images(input_folder, raw_prefix, out_prefix, extension):
     :param extension: e.g. .jpg or .png
     :return: the sorted image name list.
     """
-    img_names = [img for img in os.listdir(input_folder) if img.endswith(extension)]
+    img_names = [img for img in os.listdir(
+        input_folder) if img.endswith(extension)]
+
     def sort_by_suffix(img_name):
         delim_pattern = '\_|\.'
         spot_idx = re.split(delim_pattern, img_name)[1]
@@ -224,6 +226,36 @@ def sort_rename_images(input_folder, raw_prefix, out_prefix, extension):
     #     new_img_abs_path = os.path.join(input_folder, new_img_name)
     #     os.rename(old_img_abs_path, new_img_abs_path)
     return sorted_img_names
+
+
+def readImageTms(raw_cam_tms_filepath):
+    """
+    :param raw_cam_tms_filepath: image timestamp file
+    :return: the image timestamp map{img_idx:timestamp}.
+    """
+    img_timestamps = {}
+    with open(raw_cam_tms_filepath, 'r') as img_ts_fd:
+        for line in img_ts_fd:
+            if(len(line) > 0):
+                # data: timestamp cam_idx img_idx
+                img_ts = line.split()
+                # src time unit: s, new time unit: ns
+                img_timestamps[img_ts[2]] = str(
+                    int(float(img_ts[0]) * 1000000))+'000'
+
+    return img_timestamps
+
+
+def readImuData(raw_imu_file):
+    """
+    :param raw_imu_file: imu file
+    :return: the imu data list [['tms', 'ax', 'ay', 'az', 'gx', 'gy', 'gz'],...].
+    """
+    with open(raw_imu_file, 'r') as imu_fd:
+        imu_datas = imu_fd.readlines()
+        imu_datas = [d.split() for d in imu_datas if len(d) != 0]
+        imu_datas.sort(key=lambda x: x[0])
+        return imu_datas
 
 
 class SpotMetaItem:
