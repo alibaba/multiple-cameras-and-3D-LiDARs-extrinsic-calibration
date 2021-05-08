@@ -57,9 +57,9 @@ if __name__ == "__main__":
 
     # target filepath
     if args.target_type == 'checkerboard':
-        target_filepath = os.path.join(ws_folder, 'checkerboard_8x11_3x3cm.yaml')
+        target_filepath = os.path.join(ws_folder, 'config/checkerboard_8x11_3x3cm.yaml')
     elif args.target_type == 'apriltag':
-        target_filepath = os.path.join(ws_folder, 'april_6x6_80x80cm.yaml')
+        target_filepath = os.path.join(ws_folder, 'config/april_6x6_80x80cm.yaml')
     else:
         print('Invalid target type {}'.format(args.target_type))
         exit(-1)
