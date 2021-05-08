@@ -60,40 +60,30 @@ include_directories(${YAML_CPP_INCLUDE_DIR})
 find_package(Open3D REQUIRED)
 include_directories(${Open3D_INCLUDE_DIRS})
 
+# find glog
+# find_package(glog REQUIRED)
+message("glog found : ${GLOG_INCLUDE_DIRS}")
+include_directories(${GLOG_INCLUDE_DIRS})
+
+link_libraries(${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES})
+
+# make filesystem and io operation as libraries
+add_library(common SHARED
+    src/FileSystemTools.cpp
+    src/YamlFileIO.cpp
+)
+
+# # make Relocalizer as a library
+# add_library(Relocalizer SHARED relocalizer.cpp pnp_solver.cpp common.cpp )
+# target_link_libraries(Relocalizer ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES})
+
+# # make calibration as a library
+# add_library(calibration SHARED camera.cpp target_board.cpp mono_calibration.cpp stereo_calibration.cpp teche_calibration.cpp params_config.cpp cost_function.h)
+# target_link_libraries(calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${CERES_LIBRARIES} Relocalizer)
 
 include_directories(
-    src 
+    inc 
     "${CMAKE_CURRENT_SOURCE_DIR}/")
-
-
-# executable
-# if(WITH_VISUALIZATION)
-#     message(STATUS "Compilation include viewer.cpp")
-#     add_executable(test_stereocalibrator ./demo/test_stereocalibrator.cpp viewer.cpp)
-#     target_link_libraries(test_stereocalibrator ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES}  ${CERES_LIBRARIES} ${Pangolin_LIBRARIES} Relocalizer calibration)
-
-#     message("--Compilation of test_monocalibrator")
-#     add_executable(test_monocalibrator ./demo/test_monocalibrator.cpp viewer.cpp)
-#     target_link_libraries(test_monocalibrator ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES}  ${CERES_LIBRARIES} ${Pangolin_LIBRARIES} Relocalizer calibration)
-
-#     message("--Compilation of test_techecalibrator")
-#     add_executable(test_techecalibrator ./demo/test_techecalibrator.cpp viewer.cpp)
-#     target_link_libraries(test_techecalibrator ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES}  ${CERES_LIBRARIES} ${Pangolin_LIBRARIES} ${Open3D_LIBRARIES} Relocalizer calibration)
-# else(WITH_VISUALIZATION)
-#     message(STATUS "Compilation exclude viewer.cpp")
-#     add_executable(test_stereocalibrator ./demo/test_stereocalibrator.cpp )
-#     target_link_libraries(test_stereocalibrator ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES}  ${CERES_LIBRARIES} Relocalizer calibration)
-
-#     message("--Compilation of test_monocalibrator")
-#     add_executable(test_monocalibrator ./demo/test_monocalibrator.cpp )
-#     target_link_libraries(test_monocalibrator ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES}  ${CERES_LIBRARIES} Relocalizer calibration)
-
-#     message("--Compilation of test_techecalibrator")
-#     add_executable(test_techecalibrator ./demo/test_techecalibrator.cpp)
-#     target_link_libraries(test_techecalibrator ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES}  ${CERES_LIBRARIES} ${Open3D_LIBRARIES} Relocalizer calibration)
-# endif(WITH_VISUALIZATION)
-
-
 
 # executable
 # message("--Compilation of cctag detection")
@@ -110,5 +100,13 @@ include_directories(
 # target_link_libraries(test_eval_extrinsic calibration ) 
 
 message("--Compilation of intrinsic evaluator")
-add_executable(test_eval_kalibr ./src/eval_kalibr_result.cpp)
-target_link_libraries(test_eval_kalibr ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES}  ) 
+add_executable(test_eval_kalibr ./test/test_eval_kalibr.cpp)
+target_link_libraries(test_eval_kalibr ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog common ) 
+
+message("--Compilation of lidar2lidar calibration")
+add_executable(test_lidar2lidar_calib ./test/test_lidar2lidar_calibration.cpp)
+target_link_libraries(test_lidar2lidar_calib ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common)
+
+message("--Compilation of lidar2cam calibration")
+add_executable(test_lidar2cam_calibration ./test/test_lidar2cam_calibration.cpp)
+target_link_libraries(test_lidar2cam_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common)
