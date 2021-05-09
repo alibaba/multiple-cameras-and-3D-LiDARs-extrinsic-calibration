@@ -46,7 +46,7 @@ struct StereoParam {
     memset(cam0_distortions, 0, 4 * sizeof(double));
     memset(cam1_distortions, 0, 4 * sizeof(double));
     camera_type = "pinhole";
-    distortion_type = "equidistant";
+    distortion_type = "equi-distant";
   }
 
   void getExtrinsic(cv::Mat &R_rl, cv::Mat &t_rl)
@@ -96,7 +96,7 @@ struct MonocularParam {
       : cam_intrinsic(Eigen::Matrix3d::Identity()),
         img_width(2592),
         img_height(2048),
-        distortion_type("equidistant"),
+        distortion_type("equi-distant"),
         camera_type("pinhole") {
     memset(cam_distortions, 0, 4 * sizeof(double));
   }
@@ -926,8 +926,8 @@ bool analyzeKalibrOutput(const std::vector<MonocularParam>& v_mono_params,
 
 int main(int argc, char* argv[]) {
   if (argc < 3) {
-    std::cerr << "Usage: analyze_kalibr_output_file camera_model file_num "
-                 "kalibr_output_file1 kalibr_output_file2 kalibr_output_file3 "
+    std::cerr << "Usage: test_eval_kalibr camera_model file_num "
+                 "kalibr_file1 kalibr_file2 kalibr_file3 "
                  "analysis_file_name avg_result_file_name...\n";
     std::cerr << "\t camera_model : mono, stereo\n";
     return -1;

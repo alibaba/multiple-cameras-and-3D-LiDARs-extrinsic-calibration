@@ -129,7 +129,7 @@ void evaluateExtrinsics(const std::vector<RegistrationResult> & v_results, const
 
 int main(int argc, char **argv){
     if (argc < 3){
-        LOG(ERROR) << "Usage: test_lidar2lidar_calibration [T_l0_l1_init.yaml] [input_dataset_folder] [output_folder]";
+        LOG(FATAL) << "Usage: test_lidar2lidar_calibration [T_l0_l1_init.yaml] [input_dataset_folder] [output_folder]";
         return -1;
     }
 
@@ -138,16 +138,16 @@ int main(int argc, char **argv){
     std::string output_folder(argv[3]);
 
     if(!common::fileExists(init_ext_filepath)){
-        LOG(ERROR) << "Config file doesnot exists!";
+        LOG(FATAL) << "Config file doesnot exists!";
         return -1;
     }
     if(!common::pathExists(dataset_folder)){
-        LOG(ERROR) << "Input folder doesnot exist!";
+        LOG(FATAL) << "Input folder doesnot exist!";
         return -1;
     }
     if(!common::pathExists(output_folder)){
         if(!common::createPath(output_folder)){
-            LOG(ERROR) << "Fail to create " << output_folder;
+            LOG(FATAL) << "Fail to create " << output_folder;
             return -1;
         }
     }
@@ -159,7 +159,11 @@ int main(int argc, char **argv){
     // Eigen::Matrix4d T_base_l0 = horizontal_lidar_ptr->extrinsics();
     // Eigen::Matrix4d T_base_l1 = vertical_lidar_ptr->extrinsics();
     // initial extrinsic between two lidar
-    Eigen::Matrix4d T_l0_l1_init = common::loadExtFileOpencv(init_ext_filepath);
+    Eigen::Matrix4d T_l0_l1_init = Eigen::Matrix4d::Identity();
+    if (!common::loadExtFileOpencv(init_ext_filepath, T_l0_l1_init)){
+        LOG(FATAL) << "Fail to load " << init_ext_filepath;
+        return -1;
+    }
 
     std::vector<RegistrationResult> v_extrinsics;
 

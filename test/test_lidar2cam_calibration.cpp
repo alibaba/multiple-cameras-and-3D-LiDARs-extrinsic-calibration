@@ -162,8 +162,8 @@ Eigen::Matrix4d readCameraPoseTxt(const std::string &file)
 
 
 int main(int argc, char **argv){
-    if (argc < 3){
-        LOG(ERROR) << "Usage: test_lidar2cam_calibration [init_T_l1_cam0.yaml] [input_dataset_folder] [teche0_pose_file] [target_ply_file] [output_folder]";
+    if (argc < 6){
+        LOG(FATAL) << "Usage: test_lidar2cam_calibration [init_T_l1_cam0.yaml] [input_dataset_folder] [teche0_pose_file] [target_ply_file] [output_folder]";
         return -1;
     }
 
@@ -176,16 +176,16 @@ int main(int argc, char **argv){
     std::string output_folder(argv[5]);
 
     if(!common::fileExists(init_ext_filepath)){
-        LOG(ERROR) << "Config file doesnot exists!";
+        LOG(FATAL) << "Config file doesnot exists!";
         return -1;
     }
     if(!common::pathExists(dataset_folder)){
-        LOG(ERROR) << "Input folder doesnot exist!";
+        LOG(FATAL) << "Input folder doesnot exist!";
         return -1;
     }
     if(!common::pathExists(output_folder)){
         if(!common::createPath(output_folder)){
-            LOG(ERROR) << "Fail to create " << output_folder;
+            LOG(FATAL) << "Fail to create " << output_folder;
             return -1;
         }
     }
@@ -200,7 +200,11 @@ int main(int argc, char **argv){
     // Eigen::Matrix4d T_base_teche0 = teche0_ptr->extrinsics();
     // initial extrinsic between two lidar
     // Eigen::Matrix4d T_teche0_l1 = T_base_teche0.inverse() * T_base_l1;
-    Eigen::Matrix4d T_l1_teche0 = common::loadExtFileOpencv(init_ext_filepath);
+    Eigen::Matrix4d T_l1_teche0 = Eigen::Matrix4d::Identity();
+    if (!common::loadExtFileOpencv(init_ext_filepath, T_l1_teche0)){
+        LOG(FATAL) << "Fail to load " << init_ext_filepath;
+        return -1;
+    }
     Eigen::Matrix4d T_teche0_l1 = T_l1_teche0.inverse();
     Eigen::Matrix4d T_w_teche0 = readCameraPoseTxt(teche0_pose_filepath);
     Eigen::Matrix4d T_w_l1_init = T_w_teche0 * T_teche0_l1;

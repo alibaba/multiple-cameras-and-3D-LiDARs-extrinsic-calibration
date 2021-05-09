@@ -11,8 +11,10 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
+#include <glog/logging.h>
 
-#include "common.h"
+#include "FileSystemTools.h"
+
 
 /**
   * @brief parse cctag result file, image_xxx.jpg_CC.
@@ -25,7 +27,7 @@ std::vector<cv::Point2d> readDetectionResult(const std::string &file_name, std::
 {
     if (file_name.empty())
     {
-        std::cout << "[readDetectionResult] Empty input result file name!\n";
+        LOG(ERROR) << " Empty input result file name!\n";
         return std::vector<cv::Point2d>();
     }
     std::vector<cv::Point2d> points;
@@ -33,14 +35,14 @@ std::vector<cv::Point2d> readDetectionResult(const std::string &file_name, std::
     std::ifstream ifs(file_name);
     if (!ifs.is_open())
     {
-        std::cout << "[readDetectionResult] Fail to open result file name!\n";
+        LOG(ERROR) << " Fail to open result file name!\n";
         return std::vector<cv::Point2d>();
     }
 
     std::getline(ifs, img_path);
     if (img_path.empty())
     {
-        std::cout << "[readDetectionResult] Invalid image file path!\n";
+        LOG(ERROR) << " Invalid image file path!\n";
         return std::vector<cv::Point2d>();
     }
 
@@ -76,7 +78,7 @@ std::vector<std::string> getResultFileList(const std::string &myPath)
 {
     if (myPath.empty())
     {
-        std::cout << "[getResultFileList] Empty result folder path!\n";
+        LOG(ERROR) << " Empty result folder path!\n";
         return std::vector<std::string>();
     }
     std::vector<std::string> fileList;
@@ -131,17 +133,17 @@ bool writeCompactResultFile(const std::string &file_name,
 {
     if (file_name.empty())
     {
-        std::cout << "[writeCompactResultFile] Empty Input file name!\n";
+        LOG(ERROR) << " Empty Input file name!\n";
         return false;
     }
     if (v_total_kpts.empty())
     {
-        std::cout << "[writeCompactResultFile] Empty Input keypoints!\n";
+        LOG(ERROR) << " Empty Input keypoints!\n";
         return false;
     }
     if (v_total_img_nams.empty())
     {
-        std::cout << "[writeCompactResultFile] Empty Input image names!\n";
+        LOG(ERROR) << " Empty Input image names!\n";
         return false;
     }
 
@@ -150,11 +152,10 @@ bool writeCompactResultFile(const std::string &file_name,
     std::ofstream yaml_out_file(file_name);
     if (!yaml_out_file.is_open())
     {
-        std::cout << "[writeCompactResultFile] Fail to open yaml file!\n";
+        LOG(ERROR) << " Fail to open yaml file!\n";
         return false;
     }
 
-    // YAML::Node root_node;
     YAML::Node frame_nodes;
 
     // write frames
@@ -179,9 +180,6 @@ bool writeCompactResultFile(const std::string &file_name,
 
         frame_nodes[idx_str] = yaml_node;
     }
-    // root_node["FrameInfo"] = frame_nodes;
-
-    // yaml_out_file << root_node;
     yaml_out_file << frame_nodes;
     yaml_out_file.close();
 
@@ -192,105 +190,83 @@ int main(int argc, char *argv[])
 {
     if (argc < 3)
     {
-        ERROR_STREAM("Usage : cctag_detector /path/to/input_images_folder /path/to/output_folder.\n"
-                     << ": input_images_folder is the undistorted images folder.\n"
-                     << ": output_folder is the detection result file folder.");
+        std::cerr << "Usage : test_detect_cctag <input_img_folder> <result_filepath> <detection_exe_path>.\n";
         return -1;
     }
 
     std::string input_folder(argv[1]);
-    std::string output_folder(argv[2]);
+    std::string result_filepath(argv[2]);
+    std::string exe_path = "/home/ziqianbai/Projects/vlab/CCTag/build/src/applications/detection";
+    if (argc >= 4)
+    {
+        exe_path = argv[3];
+    }
 
-    if (input_folder.back() != '/')
-        input_folder += "/";
-    if (output_folder.back() != '/')
-        output_folder += "/";
-
-    std::string left_img_folder = input_folder + "undist_left/";
-    std::string right_img_folder = input_folder + "undist_right/";
+    if (!common::pathExists(input_folder))
+    {
+        LOG(FATAL) << " Input image folder " << input_folder << " doesnot exist!";
+        return -1;
+    }
+    if (!common::fileExists(exe_path))
+    {
+        LOG(FATAL) << " detection exe doesnot exist!";
+        return -1;
+    }
 
     auto tp_1 = std::chrono::steady_clock::now();
-
-    std::string cmd_str = "/home/ziqianbai/Projects/vlab/CCTag/build/src/applications/detection -n 3 -i " +
-                          left_img_folder + " -o " + left_img_folder;
+    std::string cmd_str = exe_path + " -n 3 -i " + input_folder + " -o " + input_folder;
     int sts = system(cmd_str.c_str());
     if (sts < 0)
     {
-        ERROR_STREAM("Call detection application fail!");
+        LOG(ERROR) << "Call detection application fail!";
         return -1;
     }
-
-    // sleep 5 second to relaunch cctag detection
-    cmd_str = "sleep 15";
+    // sleep 5 second 
+    cmd_str = "sleep 5";
     sts = system(cmd_str.c_str());
     if (sts < 0)
     {
-        ERROR_STREAM("Call sleep fail!");
-        return -1;
-    }
-
-    cmd_str = "/home/ziqianbai/Projects/vlab/CCTag/build/src/applications/detection -n 3 -i " +
-              right_img_folder + " -o " + right_img_folder;
-    sts = system(cmd_str.c_str());
-    if (sts < 0)
-    {
-        ERROR_STREAM("Call detection application fail!");
+        LOG(ERROR) << "Call sleep fail!";
         return -1;
     }
 
     auto tp_2 = std::chrono::steady_clock::now();
-    const auto detection_time = std::chrono::duration_cast<std::chrono::duration<double>>(tp_2 - tp_1).count();
-    TIMER_STREAM("CCTAG detection time is " << detection_time << "s.");
+    const auto detection_time = std::chrono::duration_cast<std::chrono::duration<double> >(tp_2 - tp_1).count();
+    LOG(INFO) << "CCTAG detection time is " << detection_time << "s.";
 
     //! generate holistic cctag detection result
-    std::vector<std::string> v_left_results = getResultFileList(left_img_folder);
-    std::vector<std::string> v_right_results = getResultFileList(right_img_folder);
-    if (v_left_results.empty() || v_right_results.empty())
+    std::vector<std::string> v_cctag_result = getResultFileList(input_folder);
+    if (v_cctag_result.empty() )
     {
-        ERROR_STREAM("Empty jpg_CC reuslts after cctag detection!");
+        LOG(ERROR) << "Empty jpg_CC reuslts after cctag detection!";
         return -1;
     }
 
-    assert(v_left_results.size() == v_right_results.size());
-    std::vector<std::string> v_left_imgs;
-    std::vector<std::string> v_right_imgs;
-    std::vector<std::vector<cv::Point2d>> v_left_total_kpts;
-    std::vector<std::vector<cv::Point2d>> v_right_total_kpts;
+    std::vector<std::string> v_img_paths;
+    std::vector<std::vector<cv::Point2d> > v_total_kpts;
 
-    for (size_t i = 0; i < v_left_results.size(); ++i)
+    for (size_t i = 0; i < v_cctag_result.size(); ++i)
     {
-        const std::string &left_result_fn = v_left_results[i];
-        const std::string &right_result_fn = v_right_results[i];
-
-        std::string left_img_name, right_img_name;
-        std::vector<cv::Point2d> left_kpts = readDetectionResult(left_result_fn, left_img_name);
-        std::vector<cv::Point2d> right_kpts = readDetectionResult(right_result_fn, right_img_name);
-        if (left_kpts.empty() || right_kpts.empty())
+        const std::string &cctag_filepath = v_cctag_result[i];
+        std::string img_filepath;
+        std::vector<cv::Point2d> left_kpts = readDetectionResult(cctag_filepath, img_filepath);
+        if (left_kpts.empty())
         {
-            WARN_STREAM(" Empty circle detected on image " << left_img_name << " or image " << right_img_name);
+            LOG(ERROR) << " Empty circle detected on image " << cctag_filepath;
             continue;
         }
 
-        v_left_total_kpts.emplace_back(left_kpts);
-        v_right_total_kpts.emplace_back(right_kpts);
-        v_left_imgs.emplace_back(left_img_name);
-        v_right_imgs.emplace_back(right_img_name);
+        v_total_kpts.emplace_back(left_kpts);
+        v_img_paths.emplace_back(img_filepath);
     }
 
-    //write into yaml file
-    std::string left_camera_rst = output_folder + "left_result.yaml";
-    std::string right_camera_rst = output_folder + "right_result.yaml";
-    bool ret = writeCompactResultFile(left_camera_rst, v_left_total_kpts, v_left_imgs);
+    //write into result file
+    bool ret = writeCompactResultFile(result_filepath, v_total_kpts, v_img_paths);
     if (!ret)
     {
-        ERROR_STREAM("FAIL to write cctag detection into " << left_camera_rst);
+        LOG(ERROR) << "FAIL to write cctag detection into " << result_filepath;
         return -1;
     }
-    ret = writeCompactResultFile(right_camera_rst, v_right_total_kpts, v_right_imgs);
-    if (!ret)
-    {
-        ERROR_STREAM("FAIL to write cctag detection into " << right_camera_rst);
-        return -1;
-    }
+
     return 0;
 }

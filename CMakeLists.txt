@@ -86,14 +86,13 @@ include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/")
 
 # executable
-# message("--Compilation of cctag detection")
-# add_executable(cctag_detector_for_slam ./demo/cctag_detector.cpp)
-# target_link_libraries(cctag_detector_for_slam ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ) 
+message("--Compilation of cctag detection")
+add_executable(test_detect_cctag ./test/test_detect_cctag.cpp)
+target_link_libraries(test_detect_cctag ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog common) 
 
-
-# message("--Compilation of image undistor")
-# add_executable(image_undistor ./demo/image_undistor.cpp)
-# target_link_libraries(image_undistor ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ) 
+message("--Compilation of image undistor")
+add_executable(test_undist_img ./test/test_undist_image.cpp)
+target_link_libraries(test_undist_img ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog common) 
 
 # message("--Compilation of extrinsic evaluator")
 # add_executable(test_eval_extrinsic ./demo/test_eval_extrinsic)
