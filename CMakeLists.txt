@@ -44,9 +44,9 @@ if(OPENMP_FOUND)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
-# # ceres
-# find_package(Ceres REQUIRED)
-# include_directories(${CERES_INCLUDE_DIRS})
+# ceres
+find_package(Ceres REQUIRED)
+include_directories(${CERES_INCLUDE_DIRS})
 
 # BOOST
 find_package(Boost REQUIRED date_time chrono thread serialization system filesystem atomic program_options timer)
@@ -62,10 +62,13 @@ include_directories(${Open3D_INCLUDE_DIRS})
 
 # find glog
 # find_package(glog REQUIRED)
-message("glog found : ${GLOG_INCLUDE_DIRS}")
 include_directories(${GLOG_INCLUDE_DIRS})
 
-link_libraries(${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES})
+include_directories(
+    inc 
+    "${CMAKE_CURRENT_SOURCE_DIR}/")
+
+link_libraries(${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} ${CERES_LIBRARIES})
 
 # make filesystem and io operation as libraries
 add_library(common SHARED
@@ -73,17 +76,24 @@ add_library(common SHARED
     src/YamlFileIO.cpp
 )
 
-# # make Relocalizer as a library
-# add_library(Relocalizer SHARED relocalizer.cpp pnp_solver.cpp common.cpp )
-# target_link_libraries(Relocalizer ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES})
+# make Relocalizer as a library
+add_library(relocalizer SHARED 
+            src/relocalizer.cpp 
+            src/pnp_solver.cpp 
+            src/common.cpp )
+target_link_libraries(relocalizer ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES})
 
-# # make calibration as a library
-# add_library(calibration SHARED camera.cpp target_board.cpp mono_calibration.cpp stereo_calibration.cpp teche_calibration.cpp params_config.cpp cost_function.h)
-# target_link_libraries(calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${CERES_LIBRARIES} Relocalizer)
+# make calibration as a library
+add_library(calibration SHARED 
+            src/camera.cpp 
+            src/target_board.cpp 
+            src/mono_calibration.cpp 
+            src/stereo_calibration.cpp 
+            src/teche_calibration.cpp 
+            src/params_config.cpp 
+            inc/cost_function.h)
+target_link_libraries(calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${CERES_LIBRARIES} relocalizer)
 
-include_directories(
-    inc 
-    "${CMAKE_CURRENT_SOURCE_DIR}/")
 
 # executable
 message("--Compilation of cctag detection")

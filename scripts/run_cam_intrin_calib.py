@@ -118,7 +118,7 @@ if __name__ == "__main__":
             src_img1_path = os.path.join(raw_cam1_folder, cam1_img_list[img_idx])
             dst_img1_path = os.path.join(out_cam1_folder, str(ts) + img_extension)
             shutil.copyfile(src_img1_path, dst_img1_path)
-        time.sleep(0.01)
+        time.sleep(0.03)
 
     # calibrate camera intrinsic and extrinsic with kalibr toolkits
     # create rosbag file

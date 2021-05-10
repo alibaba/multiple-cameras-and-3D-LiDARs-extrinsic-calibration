@@ -119,10 +119,11 @@ int main(int argc, char **argv)
         if (distort_type == "equi-distant")
         {
             cv::Mat R = cv::Mat::eye(3, 3, CV_64FC1), map1, map2;
-            new_K.at<double>(0,0) = K.at<double>(0,0) * f_scale;
-            new_K.at<double>(1,1) = K.at<double>(0,0) * f_scale;
-            new_K.at<double>(0,2) = img_width / 2;
-            new_K.at<double>(1,2) = img_height / 2;
+            // new_K.at<double>(0,0) = K.at<double>(0,0) * f_scale;
+            // new_K.at<double>(1,1) = K.at<double>(0,0) * f_scale;
+            // new_K.at<double>(0,2) = img_width / 2;
+            // new_K.at<double>(1,2) = img_height / 2;
+            new_K = K;
             cv::fisheye::initUndistortRectifyMap(K, D, R, new_K, cv::Size(img_width, img_height), CV_32FC1, map1, map2);
             cv::remap(image, undistorted_img, map1, map2, cv::InterpolationFlags::INTER_CUBIC);
         }
