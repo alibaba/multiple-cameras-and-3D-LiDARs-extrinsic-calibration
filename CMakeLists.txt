@@ -119,3 +119,11 @@ target_link_libraries(test_lidar2lidar_calib ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIE
 message("--Compilation of lidar2cam calibration")
 add_executable(test_lidar2cam_calibration ./test/test_lidar2cam_calibration.cpp)
 target_link_libraries(test_lidar2cam_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common)
+
+message("--Compilation of monocamera calibration")
+add_executable(test_mono_calibration ./test/test_monocalibrator.cpp)
+target_link_libraries(test_mono_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common calibration)
+
+message("--Compilation of panoramic camera calibration")
+add_executable(test_teche_calibration ./test/test_techecalibrator.cpp)
+target_link_libraries(test_teche_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common calibration)

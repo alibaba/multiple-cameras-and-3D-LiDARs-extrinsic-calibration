@@ -134,9 +134,14 @@ if __name__ == "__main__":
 
     # run kalibr_calibrate_cameras
     os.chdir(res_folder)
-    # kalibr_calibrate_cameras --target ${target_file} --dont-show-report  --bag ${bag_file} --models ${cam_model} --topics /cam0/image_raw #--show-extraction
-    cmds = [kalibr_calib_exe, '--target', target_filepath, '--dont-show-report', '--models', cam_model,
-            '--bag', out_bag_filepath, '--topics', '/cam0/image_raw']
+    if cam_type == 'mono':
+        # kalibr_calibrate_cameras --target ${target_file} --dont-show-report  --bag ${bag_file} --models ${cam_model} --topics /cam0/image_raw #--show-extraction
+        cmds = [kalibr_calib_exe, '--target', target_filepath, '--dont-show-report', '--models', cam_model,
+                '--bag', out_bag_filepath, '--topics', '/cam0/image_raw']
+    if cam_type == 'stereo':
+        # kalibr_calibrate_cameras --target ${target_file} --dont-show-report --bag ${bag_file} --models ${cam_model} ${cam_model} --topics /cam0/image_raw /cam1/image_raw
+        cmds = [kalibr_calib_exe, '--target', target_filepath, '--dont-show-report', '--models', cam_model, cam_model,
+                '--bag', out_bag_filepath, '--topics', '/cam0/image_raw', '/cam1/image_raw']
     if b_show_extract:
         cmds.append('--show-extraction')
     print(cmds)

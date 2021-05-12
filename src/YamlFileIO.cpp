@@ -205,4 +205,65 @@ bool saveIntrinFileOpencv(const std::string &file_name,
     fs.release();
     return true;
 }
+
+bool loadCCTagResultFile(const std::string &filepath,
+                    std::vector<std::string> &v_img_path,
+                    std::vector<std::vector<cv::Point2d>> &vv_kpts)
+{
+    if (filepath.empty())
+    {
+        std::cout << " Empty file name!\n";
+        return false;
+    }
+
+    YAML::Node frm_node;
+    try
+    {
+        frm_node = YAML::LoadFile(filepath);
+    }
+    catch (YAML::BadFile &e)
+    {
+        std::cout << " Could not open file: " << filepath << "\n";
+        return false;
+    }
+    catch (YAML::ParserException &e)
+    {
+        std::cout << " Invalid file format: " << filepath << "\n";
+        return false;
+    }
+    if (frm_node.IsNull())
+    {
+        std::cout << " Could not open file: " << filepath << "\n";
+        return false;
+    }
+
+    v_img_path.resize(frm_node.size());
+    vv_kpts.resize(frm_node.size());
+
+    // parse FramePoses
+    for (YAML::const_iterator it = frm_node.begin(); it != frm_node.end(); ++it)
+    {
+        int f = it->first.as<int>();
+        std::string id = std::to_string(f);
+
+        // image path
+        std::string img_path = frm_node[id]["image_file"].as<std::string>();
+        std::vector<cv::Point2d> v_keypoints;
+        for (size_t k = 0; k < frm_node[id]["keypoints"].size(); ++k)
+        {
+            cv::Point2d keypoint;
+            keypoint.x = frm_node[id]["keypoints"][k][0].as<double>();
+            keypoint.y = frm_node[id]["keypoints"][k][1].as<double>();
+            v_keypoints.emplace_back(keypoint);
+        }
+
+        std::cout<< " Frame " << id << " detect " << v_keypoints.size()
+                  << " cctag keypoints.\n";
+        v_img_path.emplace_back(img_path);
+        vv_kpts.emplace_back(v_keypoints);
+    }
+    std::cout<< " read " << v_img_path.size() << " frames! \n";
+
+    return true;
+}
 }

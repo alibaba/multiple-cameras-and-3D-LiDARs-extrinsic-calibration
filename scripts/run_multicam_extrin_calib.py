@@ -79,14 +79,11 @@ if __name__ == "__main__":
 
     # target filepath
     if args.target_type == 'checkerboard':
-        target_filepath = os.path.join(
-            ws_folder, 'config/checkerboard_8x11_3x3cm.yaml')
+        target_filepath = os.path.join(ws_folder, 'config/checkerboard_8x11_3x3cm.yaml')
     elif args.target_type == 'apriltag':
-        target_filepath = os.path.join(
-            ws_folder, 'config/april_6x6_80x80cm.yaml')
+        target_filepath = os.path.join(ws_folder, 'config/april_6x6_80x80cm.yaml')
     elif args.target_type == 'cctag':
-        target_filepath = os.path.join(
-            ws_folder, 'config/2020-0503-EFC-MapPoints.yaml')
+        target_filepath = os.path.join(ws_folder, 'config/cctag_20210120_EFC.yaml')
     else:
         print('Invalid target type {}'.format(args.target_type))
         exit(-1)
@@ -101,11 +98,11 @@ if __name__ == "__main__":
     img_undist_exe = os.path.join(ws_folder, 'build/test_undist_img')
     cctag_detect_exe = os.path.join(ws_folder, 'build/test_detect_cctag')
     if args.cam_num == '1':
-        cam_calib_exe = os.path.join(ws_folder, 'build/test_monocalibrator')
+        cam_calib_exe = os.path.join(ws_folder, 'build/test_mono_calibration')
     elif args.cam_num == '2':
         cam_calib_exe = os.path.join(ws_folder, 'build/test_stereocalibrator')
     elif args.cam_num == '4':
-        cam_calib_exe = os.path.join(ws_folder, 'build/test_techecalibrator')
+        cam_calib_exe = os.path.join(ws_folder, 'build/test_teche_calibration')
     else:
         print('Invalid camera number {}'.format(args.cam_num))
         exit(-1)
@@ -152,23 +149,20 @@ if __name__ == "__main__":
     cctag_sample_exe = '/code/CCTag/build/src/applications/detection'
     # test_detect_cctag <input_img_folder> <result_filepath> <detection_exe_path>
     if cam_num == '1':
-        detect_result_file = os.path.join(
-            output_folder, 'cam'+str(cam0_idx)+'_cctag_result.yaml')
+        detect_result_file = os.path.join(output_folder, 'cam'+str(cam0_idx)+'_cctag_result.yaml')
         cmds = [cctag_detect_exe, undist_cam_folder_list[cam0_idx],
                 detect_result_file, cctag_sample_exe]
         print(cmds)
         if zrpc.map([cmds])[1] == 0:
             exit(-1)
     elif cam_num == '2':
-        cam0_result_file = os.path.join(
-            output_folder, 'cam'+str(cam0_idx)+'_cctag_result.yaml')
+        cam0_result_file = os.path.join(output_folder, 'cam'+str(cam0_idx)+'_cctag_result.yaml')
         cmds = [cctag_detect_exe, undist_cam_folder_list[cam0_idx],
                 cam0_result_file, cctag_sample_exe]
         print(cmds)
         if zrpc.map([cmds])[1] == 0:
             exit(-1)
-        cam1_result_file = os.path.join(
-            output_folder, 'cam'+str(cam1_idx)+'_cctag_result.yaml')
+        cam1_result_file = os.path.join(output_folder, 'cam'+str(cam1_idx)+'_cctag_result.yaml')
         cmds = [cctag_detect_exe, undist_cam_folder_list[cam1_idx],
                 cam1_result_file, cctag_sample_exe]
         print(cmds)
@@ -178,11 +172,37 @@ if __name__ == "__main__":
         merged_cams_folder = os.path.join(output_folder, 'undist_cams')
         merge_undist_cam_folders(undist_cam_folder_list, merged_cams_folder)
 
-        detect_result_file = os.path.join(
-            output_folder, 'cams_cctag_result.yaml')
+        detect_result_file = os.path.join(output_folder, 'cams_cctag_result.yaml')
         cmds = [cctag_detect_exe, merged_cams_folder,
                 detect_result_file, cctag_sample_exe]
         print(cmds)
         if zrpc.map([cmds])[1] == 0:
             exit(-1)
-    # rename result files
+
+    # calibrate extrinsics params between multi-cameras
+    # undistorted intrinsic file of each camera
+    undist_cam_intrin_filelist = []
+    for idx in range(0, len(undist_cam_folder_list)):
+        if os.path.exists(undist_cam_folder_list[idx]):
+            undist_cam_intrin = glob.glob(os.path.join(undist_cam_folder_list[idx], '*.yaml'))[0]
+            undist_cam_intrin_filelist.append(undist_cam_intrin)
+
+    if cam_num == '1':
+        # test_mono_calibration [global_map.yaml] [cctag_result.yaml][cam0_intrin_file] [output_folder]
+        cmds = [cam_calib_exe, target_filepath, detect_result_file, undist_cam_intrin_filelist[0], output_folder]
+        print(cmds)
+        if zrpc.map([cmds])[1] == 0:
+            exit(-1)
+    elif cam_num == '2':
+        cmds = [cam_calib_exe]
+        print(cmds)
+        if zrpc.map([cmds])[1] == 0:
+            exit(-1)
+    elif cam_num == '4':
+        # test_techecalibrator [global_map.yaml] [cctag_result.yaml][cam0_intrin_file] [cam1_intrin_file] [cam2_intrin_file] [cam3_intrin_file][output_folder]
+        cmds = [cam_calib_exe, target_filepath, detect_result_file, undist_cam_intrin_filelist[0], 
+        undist_cam_intrin_filelist[1], undist_cam_intrin_filelist[2], undist_cam_intrin_filelist[3], output_folder]
+        print(cmds)
+        if zrpc.map([cmds])[1] == 0:
+            exit(-1)
+
