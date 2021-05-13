@@ -119,3 +119,11 @@ target_link_libraries(test_lidar2lidar_calib ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIE
 message("--Compilation of lidar2cam calibration")
 add_executable(test_lidar2cam_calibration ./test/test_lidar2cam_calibration.cpp)
 target_link_libraries(test_lidar2cam_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common)
+
+message("--Compilation of extrinsic evaluation")
+add_executable(test_eval_extrinsics ./test/test_eval_extrinsics)
+target_link_libraries(test_eval_extrinsics ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog  common)
+
+message("--Compilation of converting kalibr result")
+add_executable(test_cvt_kalibr_result ./test/test_cvt_kalibr_result.cpp)
+target_link_libraries(test_cvt_kalibr_result ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES})

@@ -86,7 +86,7 @@ if __name__ == "__main__":
             ws_folder, 'config/april_6x6_80x80cm.yaml')
     elif args.target_type == 'cctag':
         target_filepath = os.path.join(
-            ws_folder, 'config/2020-0503-EFC-MapPoints.yaml')
+            ws_folder, 'config/cctag_20210120_EFC.yaml')
     else:
         print('Invalid target type {}'.format(args.target_type))
         exit(-1)
