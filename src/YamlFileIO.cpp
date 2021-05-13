@@ -237,8 +237,8 @@ bool loadCCTagResultFile(const std::string &filepath,
         return false;
     }
 
-    v_img_path.resize(frm_node.size());
-    vv_kpts.resize(frm_node.size());
+    v_img_path.clear();
+    vv_kpts.clear();
 
     // parse FramePoses
     for (YAML::const_iterator it = frm_node.begin(); it != frm_node.end(); ++it)

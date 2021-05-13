@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     std::string cam3_calibration_file_name(argv[6]);
     std::string output_folder(argv[7]);
 
-    if (!common::pathExists(gt_map_file_name))
+    if (!common::fileExists(gt_map_file_name))
     {
         LOG(ERROR) << " FIle " << gt_map_file_name << " doesnot exist!";
         return -1;
