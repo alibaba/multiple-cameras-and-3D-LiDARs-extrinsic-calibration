@@ -127,3 +127,11 @@ target_link_libraries(test_eval_extrinsics ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES}
 message("--Compilation of converting kalibr result")
 add_executable(test_cvt_kalibr_result ./test/test_cvt_kalibr_result.cpp)
 target_link_libraries(test_cvt_kalibr_result ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES})
+
+message("--Compilation of monocamera calibration")
+add_executable(test_mono_calibration ./test/test_monocalibrator.cpp)
+target_link_libraries(test_mono_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common calibration)
+
+message("--Compilation of panoramic camera calibration")
+add_executable(test_teche_calibration ./test/test_techecalibrator.cpp)
+target_link_libraries(test_teche_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common calibration)
