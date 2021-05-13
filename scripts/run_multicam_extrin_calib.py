@@ -100,7 +100,7 @@ if __name__ == "__main__":
     if args.cam_num == '1':
         cam_calib_exe = os.path.join(ws_folder, 'build/test_mono_calibration')
     elif args.cam_num == '2':
-        cam_calib_exe = os.path.join(ws_folder, 'build/test_stereocalibrator')
+        cam_calib_exe = os.path.join(ws_folder, 'build/test_stereo_calibration')
     elif args.cam_num == '4':
         cam_calib_exe = os.path.join(ws_folder, 'build/test_teche_calibration')
     else:
@@ -189,12 +189,14 @@ if __name__ == "__main__":
 
     if cam_num == '1':
         # test_mono_calibration [global_map.yaml] [cctag_result.yaml][cam0_intrin_file] [output_folder]
-        cmds = [cam_calib_exe, target_filepath, detect_result_file, undist_cam_intrin_filelist[0], output_folder]
+        cmds = [cam_calib_exe, target_filepath, detect_result_file, undist_cam_intrin_filelist[cam0_idx], output_folder]
         print(cmds)
         if zrpc.map([cmds])[1] == 0:
             exit(-1)
     elif cam_num == '2':
-        cmds = [cam_calib_exe]
+        # test_stereo_calibration [global_map.yaml] [cam0_cctag_result.yaml] [cam1_cctag_result.yaml] [cam0_intrin_file] [cam1_intrin_file] [flag_calibrate_hik_teche] [output_folder]
+        calib_hetercam_flag = 0
+        cmds = [cam_calib_exe, target_filepath, cam0_result_file, cam1_result_file, undist_cam_intrin_filelist[cam0_idx], undist_cam_intrin_filelist[cam1_idx], calib_hetercam_flag, output_folder]
         print(cmds)
         if zrpc.map([cmds])[1] == 0:
             exit(-1)

@@ -89,6 +89,12 @@ public:
 
     bool writeExtrinsicParams(const std::string &directory) const;
 
+    /**
+   * @brief Get valid extrinsic param between two camera.
+   * @return extrinsic params.
+   */
+    Eigen::Matrix4d validExtrinsics() const;
+
 private:
     int readImageWidth(const std::string &filename);
     int readImageHeight(const std::string &filename);

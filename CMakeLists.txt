@@ -132,6 +132,10 @@ message("--Compilation of monocamera calibration")
 add_executable(test_mono_calibration ./test/test_monocalibrator.cpp)
 target_link_libraries(test_mono_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common calibration)
 
+message("--Compilation of stereo camera calibration")
+add_executable(test_stereo_calibration ./test/test_stereocalibrator.cpp)
+target_link_libraries(test_stereo_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common calibration)
+
 message("--Compilation of panoramic camera calibration")
 add_executable(test_teche_calibration ./test/test_techecalibrator.cpp)
 target_link_libraries(test_teche_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common calibration)

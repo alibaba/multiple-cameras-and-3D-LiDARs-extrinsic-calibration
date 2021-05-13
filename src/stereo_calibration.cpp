@@ -191,6 +191,11 @@ bool StereoCalibrator::writeExtrinsicParams(const std::string &directory) const
     return true;
 }
 
+Eigen::Matrix4d StereoCalibrator::validExtrinsics() const
+{
+    return T_r_l_;
+}
+
 bool StereoCalibrator::calibrate(void)
 {
     DEBUG_STREAM("[StereoCalibrator::calibrate] ---------------- calibrate left camera ------------------");
