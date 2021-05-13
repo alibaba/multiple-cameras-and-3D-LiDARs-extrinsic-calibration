@@ -90,7 +90,6 @@ bool alignTwoPointClouds(const std::string &src_pcl_file, const std::string &tar
 void evaluateExtrinsics(const std::vector<RegistrationResult> & v_results, const Eigen::Matrix4d &T_baseline){
     assert(v_results.size() > 1);
 
-    const Eigen::Matrix4d T_0 = v_results[0].T;
     std::vector<double> v_inlier_rms = {v_results[0].inlier_rms};
     // rotation sigma
     std::vector<double> v_sigma_r;
@@ -171,7 +170,7 @@ int main(int argc, char **argv){
         if(!boost::filesystem::is_directory(entry))
             continue;
 
-        std::string scan_folder_path = entry.path().string() + "/scans";
+        std::string scan_folder_path = entry.path().string() + "/lidar_lidar";
         std::vector<std::string> v_pcl_paths;
         std::vector<std::string> paths = {scan_folder_path};
         common::getFileLists(paths, true, "ply", &v_pcl_paths);
@@ -202,11 +201,6 @@ int main(int argc, char **argv){
     std::sort(v_extrinsics.begin(), v_extrinsics.end(), [&](RegistrationResult &res_a, RegistrationResult &res_b){
         return res_a.fitness > res_b.fitness;
     });
-
-    // std::string save_file_path = common::concatenateFolderAndFileName(output_folder, "lidar0_to_lidar1.yml");
-    // Eigen::Matrix4d avg_T = averageExtrinsics(v_extrinsics);
-    // std::cout << "T_avg:\n" << avg_T << "\n";
-    // writeCameraPoseInYaml(save_file_path, avg_T);
 
     evaluateExtrinsics(v_extrinsics, v_extrinsics[0].T);
 

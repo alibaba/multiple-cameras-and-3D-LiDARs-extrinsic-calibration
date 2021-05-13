@@ -107,6 +107,8 @@ if __name__ == "__main__":
         print('Invalid camera number {}'.format(args.cam_num))
         exit(-1)
 
+    time_start = time.time()
+    timing_info = []
     ################################## undistort image #################################
     undist_cam_folder_list = [os.path.join(output_folder, 'undist_cam0'), os.path.join(
         output_folder, 'undist_cam1'), os.path.join(output_folder, 'undist_cam2'), os.path.join(output_folder, 'undist_cam3')]
@@ -145,6 +147,9 @@ if __name__ == "__main__":
             if zrpc.map([cmds])[1] == 0:
                 exit(-1)
 
+    timing_info.append(('Generate undistorted images', time.time() - time_start))
+    time_start = time.time()
+
     ############################ run cctag detection #########################
     cctag_sample_exe = '/code/CCTag/build/src/applications/detection'
     # test_detect_cctag <input_img_folder> <result_filepath> <detection_exe_path>
@@ -178,8 +183,11 @@ if __name__ == "__main__":
         print(cmds)
         if zrpc.map([cmds])[1] == 0:
             exit(-1)
+    
+    timing_info.append(('Detect cctag on images', time.time() - time_start))
+    time_start = time.time()
 
-    # calibrate extrinsics params between multi-cameras
+    ########################### calibrate extrinsics between multi-cameras ######################
     # undistorted intrinsic file of each camera
     undist_cam_intrin_filelist = []
     for idx in range(0, len(undist_cam_folder_list)):
@@ -208,3 +216,8 @@ if __name__ == "__main__":
         if zrpc.map([cmds])[1] == 0:
             exit(-1)
 
+    timing_info.append(('Calibrate multicams', time.time() - time_start))
+    print('------------------------------')
+    for info in timing_info:
+        print('| %s: %0.3f second(s)' % (info[0], info[1]))
+    print('------------------------------')

@@ -1,3 +1,5 @@
+#include <chrono>
+
 #include "common.h"
 #include "relocalizer.h"
 #include "delaunator.hpp"
@@ -435,6 +437,7 @@ bool Relocalizer::relocalizeByFrame(const std::string &frameFileName,
                                     std::map<int, int> &inlierMatches,
                                     double &mean_reprojection_error)
 {
+    const auto tp_1 = std::chrono::steady_clock::now();
     // filte valid keypoints in image bound
     std::vector<Eigen::Vector3d> valid_bearings;
 
@@ -621,6 +624,9 @@ bool Relocalizer::relocalizeByFrame(const std::string &frameFileName,
         //     DEBUG_STREAM("[relocalize] valid map-kpt match: " << valid_sample_map_indice[i] << " -- " << valid_sample_kpts_indice[i]);
         // }
     }
+    const auto tp_2 = std::chrono::steady_clock::now();
+    const auto loc_time = std::chrono::duration_cast<std::chrono::duration<double>>(tp_2 - tp_1).count();
+    TIMER_STREAM("[relocalize] camera localization time is " << loc_time << " s");
 
     return true;
 }

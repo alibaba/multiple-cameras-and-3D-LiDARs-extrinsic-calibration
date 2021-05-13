@@ -80,7 +80,7 @@ int main(int argc, char **argv)
         return -1;
     }
     // start timer
-    const auto tp_1 = std::chrono::steady_clock::now();
+    // const auto tp_1 = std::chrono::steady_clock::now();
 
     // save w2c camera pose
     bool b_save_camera_pose_w_c = true;
@@ -134,9 +134,9 @@ int main(int argc, char **argv)
         LOG(ERROR) << " Fail to calibrate teche 360 anywhere camera";
         return -1;
     }
-    const auto tp_2 = std::chrono::steady_clock::now();
-    const auto calib_time = std::chrono::duration_cast<std::chrono::duration<double>>(tp_2 - tp_1).count();
-    TIMER_STREAM("[test_techecalibrator] caliration time is " << calib_time << " s");
+    // const auto tp_2 = std::chrono::steady_clock::now();
+    // const auto calib_time = std::chrono::duration_cast<std::chrono::duration<double>>(tp_2 - tp_1).count();
+    // TIMER_STREAM("[test_techecalibrator] caliration time is " << calib_time << " s");
 
     std::vector<Eigen::Matrix4d> v_cam_poses_w2c = teche_calibrator.validCameraPoses();
     // rotation axis 2 camera
