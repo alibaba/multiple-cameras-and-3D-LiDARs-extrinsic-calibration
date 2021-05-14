@@ -20,10 +20,11 @@ if __name__ == "__main__":
     parser.add_argument("ws_folder", type=str, default="",
                         help="the workspace folder")
     parser.add_argument('dataset_folder', type=str, default="",
-                        help='the input dataset folder')
+                        help='the input dataset folder. e.g.https://yuque.antfin-inc.com/aone857851/udonh7/bmazpr')
     parser.add_argument('output_folder', type=str, default='',
                         help='the folder of output files')
-    parser.add_argument('init_T_yaml', type=str, default='', help='the initial Transform between lidar0 and lidar1')
+    parser.add_argument('init_T_yaml', type=str, default='',
+                        help='the initial Transform between lidar0 and lidar1')
     parser.add_argument('--extension', type=str, default='.ply',
                         help='the extension of lidar point cloud under dataset folder')
     parser.add_argument('--lidar0_idx', type=int, default=0,
@@ -47,10 +48,15 @@ if __name__ == "__main__":
         exit(-1)
 
     # raw data folder path
-    raw_lidar_folder_list = glob.glob(os.path.join(dataset_folder, 'data*'))
-    if len(raw_lidar_folder_list) == 0:
-        print('Empty data in {}'.format(dataset_folder))
-        exit(-1)
+    raw_data_folder_list = glob.glob(os.path.join(dataset_folder, 'data*'))
+    assert(len(raw_data_folder_list))
+    for data in raw_data_folder_list:
+        raw_lidar_folder = os.path.join(data, 'lidar_lidar')
+        lidar0_scan_folder = os.path.join(raw_lidar_folder, 'lidar0')
+        lidar1_scan_folder = os.path.join(raw_lidar_folder, 'lidar1')
+        if mv3dhelper.check_folder_empty(lidar0_scan_folder) or mv3dhelper.check_folder_empty(lidar1_scan_folder):
+            print('lidar scan folder empty!')
+            exit(-1)
 
     mv3dhelper.create_folder_if_not_exists(output_folder)
 
@@ -65,7 +71,7 @@ if __name__ == "__main__":
     print(cmds)
     if zrpc.map([cmds])[1] == 0:
         exit(-1)
-        
+
     timing_info.append(('Calibrate multicams', time.time() - time_start))
     print('------------------------------')
     for info in timing_info:

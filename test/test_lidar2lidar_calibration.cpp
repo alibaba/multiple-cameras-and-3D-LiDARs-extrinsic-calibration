@@ -128,13 +128,18 @@ void evaluateExtrinsics(const std::vector<RegistrationResult> & v_results, const
 
 int main(int argc, char **argv){
     if (argc < 3){
-        LOG(FATAL) << "Usage: test_lidar2lidar_calibration [T_l0_l1_init.yaml] [input_dataset_folder] [output_folder]";
+        LOG(FATAL) << "Usage: test_lidar2lidar_calibration [T_l0_l1_init.yaml] [input_dataset_folder] [output_folder] [lidar0_id] [lidar1_id]";
         return -1;
     }
 
     std::string init_ext_filepath(argv[1]);
     std::string dataset_folder(argv[2]);
     std::string output_folder(argv[3]);
+    int lidar0_id = 0, lidar1_id = 1;
+    if (argc == 6){
+        lidar0_id = std::stoi (argv[4]);
+        lidar1_id = std::stoi (argv[5]);
+    }
 
     if(!common::fileExists(init_ext_filepath)){
         LOG(FATAL) << "Config file doesnot exists!";
@@ -171,18 +176,32 @@ int main(int argc, char **argv){
             continue;
 
         std::string scan_folder_path = entry.path().string() + "/lidar_lidar";
-        std::vector<std::string> v_pcl_paths;
-        std::vector<std::string> paths = {scan_folder_path};
-        common::getFileLists(paths, true, "ply", &v_pcl_paths);
-        assert(v_pcl_paths.size() == 2);
+        std::string lidar0_scan_folder = common::concatenateFolderAndFileName(scan_folder_path, "lidar0");
+        std::string lidar1_scan_folder = common::concatenateFolderAndFileName(scan_folder_path, "lidar1");
+        std::vector<std::string> v_lidar0_pcl_paths,  v_lidar1_pcl_paths;
+        std::vector<std::string> paths = {lidar0_scan_folder};
+        common::getFileLists(paths, true, "ply", &v_lidar0_pcl_paths);
+        paths = {lidar1_scan_folder};
+        common::getFileLists(paths, true, "ply", &v_lidar1_pcl_paths);
+
+        if (v_lidar0_pcl_paths.empty() || v_lidar1_pcl_paths.empty()){
+            LOG(ERROR) << "lidar scan folder is empty!\n";
+            return -1;
+        }
+        // only choose 1 scan pair for calibration
         std::string src_pcl_file_path, target_pcl_file_path;
-        for(size_t i = 0; i < v_pcl_paths.size(); ++i){
-            std::string file_path = v_pcl_paths[i];
+        {
+            std::string file_path = v_lidar0_pcl_paths[0];
             std::string path, file_name;
             common::splitPathAndFilename(file_path, &path, &file_name);
-            if(file_name[0] == '0')
+            if(std::atoi(&file_name[0]) == lidar0_id)
                 target_pcl_file_path = file_path;
-            if(file_name[0] == '1')
+        }
+        {
+            std::string file_path = v_lidar1_pcl_paths[0];
+            std::string path, file_name;
+            common::splitPathAndFilename(file_path, &path, &file_name);
+            if(std::atoi(&file_name[0]) == lidar1_id)
                 src_pcl_file_path = file_path;
         }
 
