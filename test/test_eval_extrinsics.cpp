@@ -70,12 +70,14 @@ void evaluateBackpackExt(const std::vector<Eigen::Matrix4d> &v_extrinsics, const
     T_c0_c3_gt.block<3, 1>(0, 3) = t_c0_c3;
 
     Eigen::Matrix4d T_l0_c0_gt = Eigen::Matrix4d::Identity();
-    // Eigen::AngleAxisd l0_c0_vec1 = Eigen::AngleAxisd(110*M_PI/180.0, Eigen::Vector3d(0,0,1));
-    // Eigen::AngleAxisd l0_c0_vec2 = Eigen::AngleAxisd(90*M_PI/180.0, Eigen::Vector3d(0,1,0));
-    // Eigen::Matrix3d l0_l1_vec =  l0_l1_vec1.matrix()*l0_l1_vec2.matrix();
-    // Eigen::Vector3d t_l0_l1(-0.22555, 0.13022, -0.34922);
-    // T_l0_l1_gt.block<3,3>(0, 0) = l0_l1_vec;
-    // T_l0_l1_gt.block<3, 1>(0, 3) = t_l0_l1;
+    Eigen::Matrix4d T_l1_c0_gt = Eigen::Matrix4d::Identity();
+    Eigen::AngleAxisd l1_c0_vec1 = Eigen::AngleAxisd(-15*M_PI/180.0, Eigen::Vector3d(0,1,0));
+    Eigen::AngleAxisd l1_c0_vec2 = Eigen::AngleAxisd(90*M_PI/180.0, Eigen::Vector3d(0,0,1));
+    Eigen::Matrix3d l1_c0_vec =  l1_c0_vec1.matrix()*l1_c0_vec2.matrix();
+    Eigen::Vector3d t_l1_c0(0.58192, 0.0, -0.1954);
+    T_l1_c0_gt.block<3,3>(0, 0) = l1_c0_vec;
+    T_l1_c0_gt.block<3, 1>(0, 3) = l1_c0_vec* t_l1_c0;
+    std::cout << "T_l1_c0_gt:\n" << T_l1_c0_gt << "\n";
 
     Eigen::Matrix4d T_l0_l1_gt = Eigen::Matrix4d::Identity();
     Eigen::AngleAxisd l0_l1_vec1 = Eigen::AngleAxisd(-30*M_PI/180.0, Eigen::Vector3d(0,0,1));
@@ -94,6 +96,8 @@ void evaluateBackpackExt(const std::vector<Eigen::Matrix4d> &v_extrinsics, const
         T_gt = T_c0_c3_gt;
     if (eval_pattern == "lidar0_to_camera0")
         T_gt = T_l0_c0_gt;
+    if (eval_pattern == "lidar1_to_camera0")
+        T_gt = T_l1_c0_gt;
     if (eval_pattern == "lidar0_to_lidar1")
         T_gt = T_l0_l1_gt;
 
@@ -102,8 +106,9 @@ void evaluateBackpackExt(const std::vector<Eigen::Matrix4d> &v_extrinsics, const
     for(auto &T_ext : v_extrinsics){
         Eigen::Matrix4d T_error = T_gt.inverse() * T_ext;
 
+        std::cout << "T_ext:\n" << T_ext << "\n";
         Eigen::Matrix3d R = T_ext.block<3, 3>(0, 0);
-        Eigen::Vector3d v_angles = R.eulerAngles(2,0,1) * 180.0/M_PI;
+        Eigen::Vector3d v_angles = R.eulerAngles(2,1,0) * 180.0/M_PI;
         avg_yaw += (std::abs(v_angles[0]) > 90) ? (180 - std::abs(v_angles[0])) : std::abs(v_angles[0]);
         avg_pitch += (std::abs(v_angles[1]) > 90) ? (180 - std::abs(v_angles[1])) : std::abs(v_angles[1]);
         avg_roll += (std::abs(v_angles[2]) > 90) ? (180 - std::abs(v_angles[2])) : std::abs(v_angles[2]);
