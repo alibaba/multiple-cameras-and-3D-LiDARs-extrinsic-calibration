@@ -163,7 +163,7 @@ Eigen::Matrix4d readCameraPoseTxt(const std::string &file)
 
 int main(int argc, char **argv){
     if (argc < 6){
-        LOG(FATAL) << "Usage: test_lidar2cam_calibration [init_T_l1_cam0.yaml] [input_dataset_folder] [teche0_pose_file] [target_ply_file] [output_folder]";
+        LOG(FATAL) << "Usage: test_lidar2cam_calibration [init_T_l1_cam0.yaml] [dataset_folder] [cam_pose_file] [target_ply_file] [output_folder] [lidar_id]";
         return -1;
     }
 
@@ -174,6 +174,10 @@ int main(int argc, char **argv){
     // target pointcloud used in lidar localization
     std::string target_pcl_file_path(argv[4]);
     std::string output_folder(argv[5]);
+    int lidar_id = 0;
+    if (argc >= 7 ){
+        lidar_id = std::atoi(argv[6]);
+    }
 
     if(!common::fileExists(init_ext_filepath)){
         LOG(FATAL) << "Config file doesnot exists!";
@@ -214,17 +218,16 @@ int main(int argc, char **argv){
     //     if(!boost::filesystem::is_directory(entry))
     //         continue;
 
-        std::string scan_folder_path = common::concatenateFolderAndFileName(dataset_folder, "scans");
+        std::string scan_folder_path = common::concatenateFolderAndFileName(dataset_folder, "lidar"+std::to_string(lidar_id));
         std::vector<std::string> v_pcl_paths;
         std::vector<std::string> paths = {scan_folder_path};
         common::getFileLists(paths, true, "ply", &v_pcl_paths);
-        assert(v_pcl_paths.size() == 2);
         std::string src_pcl_file_path;
         for(size_t i = 0; i < v_pcl_paths.size(); ++i){
             std::string file_path = v_pcl_paths[i];
             std::string path, file_name;
             common::splitPathAndFilename(file_path, &path, &file_name);
-            if(file_name[0] == '1')
+            if(std::atoi(&file_name[0]) == lidar_id)
                 src_pcl_file_path = file_path;
         }
 
@@ -238,7 +241,7 @@ int main(int argc, char **argv){
         // T_l1_teche0 after icp refine
         regist_result.T = T_w_l1.inverse() * T_w_teche0;
         std::cout << "Final T_l1_teche0: \n" << regist_result.T << "\n";
-        std::string save_file_path = common::concatenateFolderAndFileName(scan_folder_path, "lidar1_to_teche0.yml");
+        std::string save_file_path = common::concatenateFolderAndFileName(scan_folder_path, "lidar1_to_cam0.yml");
         common::saveExtFileOpencv(save_file_path, regist_result.T);
         v_extrinsics.emplace_back(regist_result);
     // }

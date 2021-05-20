@@ -236,7 +236,6 @@ void FullPermutation(T start, T end, T array[], std::vector<std::vector<T>> &out
  */
 bool readIntrinsicFile(const std::string &file_name, Eigen::Matrix3d &intrinsic);
 
-bool checkAndCreateFolder(const std::string &folder);
 /**
  * @brief random pick samples out of totalSamples.
  * @param n is the number of random range.

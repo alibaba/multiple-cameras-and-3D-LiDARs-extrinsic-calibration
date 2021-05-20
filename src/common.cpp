@@ -3,7 +3,6 @@
 #include <Eigen/Geometry>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>
-#include <boost/filesystem.hpp>
 
 size_t randomPick(size_t n)
 {
@@ -23,25 +22,6 @@ std::mt19937 create_random_engine()
     std::generate(v.begin(), v.end(), std::ref(random_device));
     std::seed_seq seed(v.begin(), v.end());
     return std::mt19937(seed);
-}
-
-bool checkAndCreateFolder(const std::string &folder)
-{
-    try
-    {
-        if (!boost::filesystem::exists(folder))
-        {
-            boost::filesystem::create_directories(folder);
-            boost::filesystem::permissions(folder, boost::filesystem::all_all);
-        }
-    }
-    catch (boost::filesystem::filesystem_error &e)
-    {
-        std::cout << __FUNCTION__ << e.what() << " " << folder << std::endl;
-        return false;
-    }
-
-    return boost::filesystem::exists(folder);
 }
 
 unsigned int computeIterationsNumberAdaptively(float inlierProbability, int sample_num)

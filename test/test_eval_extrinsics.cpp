@@ -83,9 +83,9 @@ void evaluateBackpackExt(const std::vector<Eigen::Matrix4d> &v_extrinsics, const
     Eigen::AngleAxisd l0_l1_vec1 = Eigen::AngleAxisd(-30*M_PI/180.0, Eigen::Vector3d(0,0,1));
     Eigen::AngleAxisd l0_l1_vec2 = Eigen::AngleAxisd(-75*M_PI/180.0, Eigen::Vector3d(0,1,0));
     Eigen::Matrix3d l0_l1_vec =  l0_l1_vec1.matrix()*l0_l1_vec2.matrix();
-    Eigen::Vector3d t_l0_l1(-0.22555, 0.13022, -0.34922);
+    Eigen::Vector3d t_l0_l1(-0.2604, 0, -0.34922);
     T_l0_l1_gt.block<3,3>(0, 0) = l0_l1_vec;
-    T_l0_l1_gt.block<3, 1>(0, 3) = t_l0_l1;
+    T_l0_l1_gt.block<3, 1>(0, 3) = l0_l1_vec1.matrix() * t_l0_l1;
 
     Eigen::Matrix4d T_gt = Eigen::Matrix4d::Identity();
     if (eval_pattern == "camera0_to_camera1")

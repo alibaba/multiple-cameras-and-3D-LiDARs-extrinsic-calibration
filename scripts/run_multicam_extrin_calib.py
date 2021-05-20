@@ -192,7 +192,7 @@ if __name__ == "__main__":
     undist_cam_intrin_filelist = []
     for idx in range(0, len(undist_cam_folder_list)):
         if os.path.exists(undist_cam_folder_list[idx]):
-            undist_cam_intrin = glob.glob(os.path.join(undist_cam_folder_list[idx], '*.yaml'))[0]
+            undist_cam_intrin = glob.glob(os.path.join(undist_cam_folder_list[idx], '*.y*ml'))[0]
             undist_cam_intrin_filelist.append(undist_cam_intrin)
 
     if cam_num == '1':
