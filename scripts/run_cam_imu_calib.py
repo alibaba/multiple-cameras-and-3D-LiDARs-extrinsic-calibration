@@ -21,8 +21,9 @@ def copyAndRenameRawData(raw_cam_folder, raw_imu_file, img_list, out_cam_folder,
         print('{} doesnot exist!'.format(raw_cam_tms_filepath))
         exit(-1)
 
+    # the raw image tms unit is s, then we cvt it into ns
     img_tms = mv3dhelper.readImageTms(raw_cam_tms_filepath)
-    # img_start_timestamps = float(img_tms['0'])/1000000
+    # the raw imu tms unit is ms
     imu_data = mv3dhelper.readImuData(raw_imu_file)
 
     # copy images to out_cam_folder
@@ -41,7 +42,7 @@ def copyAndRenameRawData(raw_cam_folder, raw_imu_file, img_list, out_cam_folder,
         # timestamp: ms
         imu_timestamp = float(data[0])
         # if imu_timestamp >= img_start_timestamps:
-        print("imu_timestamp: {}".format(imu_timestamp))
+        # the raw imu tms unit is ms, then we cvt it into ns
         new_imu_tuple = (int(imu_timestamp*1000000), data[4], data[5],
                          data[6], data[1], data[2], data[3])
         new_imu_datas.append(new_imu_tuple)
@@ -135,16 +136,14 @@ if __name__ == "__main__":
         os.remove(out_imu_file)
     os.makedirs(out_cam0_folder)
 
-    copyAndRenameRawData(raw_cam_folder, raw_imu_file, cam0_img_list,
-                         out_cam0_folder, out_imu_file)
+    copyAndRenameRawData(raw_cam_folder, raw_imu_file, cam0_img_list, out_cam0_folder, out_imu_file)
 
     # create rosbag
     if not os.path.exists(out_bag_filepath):
         mv3dhelper.create_folder_if_not_exists(res_folder)
         ros_data_folder = os.path.join(output_folder, 'data')
         # kalibr_bagcreater --folder ${data_path} --output-bag ${bag_file}
-        cmds = [kalibr_bag_exe, '--folder', ros_data_folder,
-                '--output-bag', out_bag_filepath]
+        cmds = [kalibr_bag_exe, '--folder', ros_data_folder, '--output-bag', out_bag_filepath]
         print(cmds)
         if zrpc.map([cmds])[1] == 0:
             exit(-1)
