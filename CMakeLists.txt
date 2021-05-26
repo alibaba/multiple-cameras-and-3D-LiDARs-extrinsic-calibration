@@ -139,3 +139,7 @@ target_link_libraries(test_stereo_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARI
 message("--Compilation of panoramic camera calibration")
 add_executable(test_teche_calibration ./test/test_techecalibrator.cpp)
 target_link_libraries(test_teche_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common calibration)
+
+message("--Compilation of generate backpack yaml file")
+add_executable(test_generate_backpack_yaml ./test/test_gen_backpack_yaml.cpp)
+target_link_libraries(test_generate_backpack_yaml ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog common)
