@@ -23,6 +23,37 @@ struct RegistrationResult{
     double inlier_rms;
 };
 
+// create init extrinsic file
+void createLidarCamExtFile(const std::string& filepath, int lidar_id)
+{
+    std::string folder, filename;
+    common::splitPathAndFilename(filepath, &folder, &filename);
+
+    std::string init_T_l0_c0_filepath = common::concatenateFolderAndFileName(folder, "init_lidar0_to_camera0.yml");
+    // new backpack structural value
+    Eigen::Matrix4d T_l0_c0_gt = Eigen::Matrix4d::Identity();
+    Eigen::AngleAxisd l0_c0_vec1(-30 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
+    Eigen::AngleAxisd l0_c0_vec2(90 * M_PI / 180.0, Eigen::Vector3d(1, 0, 0));
+    Eigen::AngleAxisd l0_c0_vec3( M_PI, Eigen::Vector3d(0, 0, 1));
+    Eigen::Matrix3d l0_c0_vec = l0_c0_vec1.matrix() * l0_c0_vec2.matrix() * l0_c0_vec3.matrix();
+    Eigen::Vector3d t_l0_c0(0.0, -0.05657, -0.05931);
+    T_l0_c0_gt.block<3, 3>(0, 0) = l0_c0_vec;
+    T_l0_c0_gt.block<3, 1>(0, 3) = l0_c0_vec1.matrix() * t_l0_c0;
+    // std::cout << "T_l0_c0_gt:\n" << T_l0_c0_gt << "\n";
+    common::saveExtFileOpencv(init_T_l0_c0_filepath, T_l0_c0_gt);   
+
+    Eigen::Matrix4d T_l0_l1_gt = Eigen::Matrix4d::Identity();
+    Eigen::AngleAxisd l0_l1_vec1(-30 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
+    Eigen::AngleAxisd l0_l1_vec2(-73.5 * M_PI / 180.0, Eigen::Vector3d(0, 1, 0));
+    Eigen::Matrix3d l0_l1_vec = l0_l1_vec1.matrix() * l0_l1_vec2.matrix();
+    Eigen::Vector3d t_l0_l1(-0.31405, 0, -0.39803);
+    T_l0_l1_gt.block<3, 3>(0, 0) = l0_l1_vec;
+    T_l0_l1_gt.block<3, 1>(0, 3) = l0_l1_vec1.matrix() * t_l0_l1;
+    // calc T_l1_c0
+    Eigen::Matrix4d T_l1_c0_gt = T_l0_l1_gt.inverse() * T_l0_c0_gt;
+    common::saveExtFileOpencv(filepath, T_l1_c0_gt);
+}
+
 bool alignTwoPointClouds(const std::string &src_pcl_file, const std::string &target_pcl_file, const Eigen::Matrix4d &T_init, 
                 RegistrationResult &result){
     std::string path, file_name;
@@ -168,20 +199,22 @@ int main(int argc, char **argv){
     }
 
     std::string init_ext_filepath(argv[1]);
+    // dataset folder e.g. /path/data0/lidar_cam
     std::string dataset_folder(argv[2]);
     // teche0 pose w.r.t calibration reference
     std::string teche0_pose_filepath(argv[3]);
     // target pointcloud used in lidar localization
     std::string target_pcl_file_path(argv[4]);
     std::string output_folder(argv[5]);
-    int lidar_id = 0;
+    int lidar_id = 1;
+    // specificly camera0!!!
+    // int cam_id = 0;
     if (argc >= 7 ){
         lidar_id = std::atoi(argv[6]);
     }
 
     if(!common::fileExists(init_ext_filepath)){
-        LOG(FATAL) << "Config file doesnot exists!";
-        return -1;
+        createLidarCamExtFile(init_ext_filepath, lidar_id);
     }
     if(!common::pathExists(dataset_folder)){
         LOG(FATAL) << "Input folder doesnot exist!";
@@ -194,11 +227,6 @@ int main(int argc, char **argv){
         }
     }
     
-    // common::ParamConfig::setParameterFile(config_file_path);
-    // common::MultiRayLidarPtr vertical_lidar_ptr = common::SensorFactory::createMultiRayLidar("vertical_lidar");
-    // common::MultiRayLidarPtr horizontal_lidar_ptr = common::SensorFactory::createMultiRayLidar("horizon_lidar");
-    // common::BaseCameraPtr teche0_ptr = common::SensorFactory::createCamera("teche_0", "pinhole");
-
     // Eigen::Matrix4d T_base_l0 = horizontal_lidar_ptr->extrinsics();
     // Eigen::Matrix4d T_base_l1 = vertical_lidar_ptr->extrinsics();
     // Eigen::Matrix4d T_base_teche0 = teche0_ptr->extrinsics();
@@ -218,6 +246,7 @@ int main(int argc, char **argv){
     //     if(!boost::filesystem::is_directory(entry))
     //         continue;
 
+    //     std::string data_folder = entry.path().string() + "/lidar_cam";
         std::string scan_folder_path = common::concatenateFolderAndFileName(dataset_folder, "lidar"+std::to_string(lidar_id));
         std::vector<std::string> v_pcl_paths;
         std::vector<std::string> paths = {scan_folder_path};
@@ -241,7 +270,7 @@ int main(int argc, char **argv){
         // T_l1_teche0 after icp refine
         regist_result.T = T_w_l1.inverse() * T_w_teche0;
         std::cout << "Final T_l1_teche0: \n" << regist_result.T << "\n";
-        std::string save_file_path = common::concatenateFolderAndFileName(scan_folder_path, "lidar1_to_cam0.yml");
+        std::string save_file_path = common::concatenateFolderAndFileName(output_folder, "lidar"+std::to_string(lidar_id)+"_to_camera0.yml");
         common::saveExtFileOpencv(save_file_path, regist_result.T);
         v_extrinsics.emplace_back(regist_result);
     // }

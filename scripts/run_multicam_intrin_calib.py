@@ -153,19 +153,19 @@ if __name__ == "__main__":
 
     ############################ run kalibr result evaluation ###################################
     # test_eval_kalibr <camera_model> <file_num> <kalibr_file1> <kalibr_file2> <kalibr_file3> <analysis_file_name> <avg_result_file_name>
-    cam0_res_filepath = os.path.join(output_folder, 'cam0.yaml')
+    cam0_res_filepath = os.path.join(output_folder, 'cam0.yml')
     cam0_analy_filepath = os.path.join(output_folder, 'cam0_analysis.txt')
     eval_mono_camera_intrin(intrin_eval_exe, cam0_res_list, cam0_res_filepath, cam0_analy_filepath)
 
-    cam1_res_filepath = os.path.join(output_folder, 'cam1.yaml')
+    cam1_res_filepath = os.path.join(output_folder, 'cam1.yml')
     cam1_analy_filepath = os.path.join(output_folder, 'cam1_analysis.txt')
     eval_mono_camera_intrin(intrin_eval_exe, cam1_res_list, cam1_res_filepath, cam1_analy_filepath)
 
-    cam2_res_filepath = os.path.join(output_folder, 'cam2.yaml')
+    cam2_res_filepath = os.path.join(output_folder, 'cam2.yml')
     cam2_analy_filepath = os.path.join(output_folder, 'cam2_analysis.txt')
     eval_mono_camera_intrin(intrin_eval_exe, cam2_res_list, cam2_res_filepath, cam2_analy_filepath)
 
-    cam3_res_filepath = os.path.join(output_folder, 'cam3.yaml')
+    cam3_res_filepath = os.path.join(output_folder, 'cam3.yml')
     cam3_analy_filepath = os.path.join(output_folder, 'cam3_analysis.txt')
     eval_mono_camera_intrin(intrin_eval_exe, cam3_res_list, cam3_res_filepath, cam3_analy_filepath)
     

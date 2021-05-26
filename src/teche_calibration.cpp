@@ -1,5 +1,6 @@
 #include "cost_function.h"
 #include "params_config.h"
+#include "YamlFileIO.h"
 #include "teche_calibration.h"
 
 TecheCalibrator::TecheCalibrator(camera::model_type_t camModelType,
@@ -34,15 +35,24 @@ int TecheCalibrator::readImageWidth(const std::string &filename)
         return -1;
     }
 
-    cv::FileStorage fs(filename, cv::FileStorage::READ);
-    if (!fs.isOpened())
-    {
-        ERROR_STREAM("[TecheCalibrator::readImageWidth] Fail to open file: " + filename);
-        return -1;
+    cv::Mat intrin_mat, distortion_mat;
+    int width, height;
+    std::string distortion_type;
+    if (!common::loadIntrinFileOpencv(filename, intrin_mat, distortion_mat, distortion_type, width, height)){
+        if(!common::loadIntrinFileKalibr(filename, intrin_mat, distortion_mat, distortion_type, width, height)){
+            return false;
+        }
     }
 
-    int width = (int)fs["image_width"];
-    fs.release();
+    // cv::FileStorage fs(filename, cv::FileStorage::READ);
+    // if (!fs.isOpened())
+    // {
+    //     ERROR_STREAM("[TecheCalibrator::readImageWidth] Fail to open file: " + filename);
+    //     return -1;
+    // }
+
+    // int width = (int)fs["image_width"];
+    // fs.release();
     return width;
 }
 
@@ -54,15 +64,24 @@ int TecheCalibrator::readImageHeight(const std::string &filename)
         return -1;
     }
 
-    cv::FileStorage fs(filename, cv::FileStorage::READ);
-    if (!fs.isOpened())
-    {
-        ERROR_STREAM("[TecheCalibrator::readImageHeight] Fail to open file: " + filename);
-        return -1;
+    cv::Mat intrin_mat, distortion_mat;
+    int width, height;
+    std::string distortion_type;
+    if (!common::loadIntrinFileOpencv(filename, intrin_mat, distortion_mat, distortion_type, width, height)){
+        if(!common::loadIntrinFileKalibr(filename, intrin_mat, distortion_mat, distortion_type, width, height)){
+            return false;
+        }
     }
 
-    int height = (int)fs["image_height"];
-    fs.release();
+    // cv::FileStorage fs(filename, cv::FileStorage::READ);
+    // if (!fs.isOpened())
+    // {
+    //     ERROR_STREAM("[TecheCalibrator::readImageHeight] Fail to open file: " + filename);
+    //     return -1;
+    // }
+
+    // int height = (int)fs["image_height"];
+    // fs.release();
     return height;
 }
 

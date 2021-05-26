@@ -22,6 +22,22 @@ struct RegistrationResult{
     double inlier_rms;
 };
 
+// create init extrinsic file
+void createMultiLidarExtFile(const std::string& filename)
+{
+    // new backpack structural value
+    Eigen::Matrix4d T_l0_l1_gt = Eigen::Matrix4d::Identity();
+    Eigen::AngleAxisd l0_l1_vec1(-30 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
+    Eigen::AngleAxisd l0_l1_vec2(-73.5 * M_PI / 180.0, Eigen::Vector3d(0, 1, 0));
+    Eigen::Matrix3d l0_l1_vec = l0_l1_vec1.matrix() * l0_l1_vec2.matrix();
+    Eigen::Vector3d t_l0_l1(-0.31405, 0, -0.39803);
+    T_l0_l1_gt.block<3, 3>(0, 0) = l0_l1_vec;
+    T_l0_l1_gt.block<3, 1>(0, 3) = l0_l1_vec1.matrix() * t_l0_l1;
+    std::cout << "T_l0_l1_gt:\n" << T_l0_l1_gt << "\n";
+
+    common::saveExtFileOpencv(filename, T_l0_l1_gt);   
+}
+
 bool alignTwoPointClouds(const std::string &src_pcl_file, const std::string &target_pcl_file, const Eigen::Matrix4d &T_init, 
                 RegistrationResult &result){
     std::string path, file_name;
@@ -48,7 +64,7 @@ bool alignTwoPointClouds(const std::string &src_pcl_file, const std::string &tar
 
     const double max_corresp_dis = 0.03; // meter
     open3d::registration::ICPConvergenceCriteria icp_criteria(1e-6, 1e-6, 100);
-    // icp_result = open3d::registration::RegistrationICP(*src_pcd_down_ptr, *target_pcd_down_ptr, max_corresp_dis, Eigen::Matrix4d::Identity(),
+    // icp_result = open3d::registration::RegistrationICP(*src_pcd_ptr, *target_pcd_ptr, max_corresp_dis, Eigen::Matrix4d::Identity(),
     //                                                         open3d::registration::TransformationEstimationPointToPlane(), icp_criteria);
     icp_result = open3d::registration::RegistrationICP(*src_pcd_ptr, *target_pcd_ptr, max_corresp_dis, Eigen::Matrix4d::Identity(),
                                                     open3d::registration::TransformationEstimationPointToPoint(false), icp_criteria);
@@ -133,6 +149,7 @@ int main(int argc, char **argv){
     }
 
     std::string init_ext_filepath(argv[1]);
+    // dataset folder e.g. /path/data0/lidar_lidar
     std::string dataset_folder(argv[2]);
     std::string output_folder(argv[3]);
     int lidar0_id = 0, lidar1_id = 1;
@@ -141,9 +158,9 @@ int main(int argc, char **argv){
         lidar1_id = std::stoi (argv[5]);
     }
 
+    // if initial extrinsic isn't here, create it
     if(!common::fileExists(init_ext_filepath)){
-        LOG(FATAL) << "Config file doesnot exists!";
-        return -1;
+        createMultiLidarExtFile(init_ext_filepath);
     }
     if(!common::pathExists(dataset_folder)){
         LOG(FATAL) << "Input folder doesnot exist!";
@@ -155,10 +172,6 @@ int main(int argc, char **argv){
             return -1;
         }
     }
-    
-    // common::ParamConfig::setParameterFile(config_file_path);
-    // common::MultiRayLidarPtr vertical_lidar_ptr = common::SensorFactory::createMultiRayLidar("vertical_lidar");
-    // common::MultiRayLidarPtr horizontal_lidar_ptr = common::SensorFactory::createMultiRayLidar("horizon_lidar");
 
     // Eigen::Matrix4d T_base_l0 = horizontal_lidar_ptr->extrinsics();
     // Eigen::Matrix4d T_base_l1 = vertical_lidar_ptr->extrinsics();
@@ -171,13 +184,13 @@ int main(int argc, char **argv){
 
     std::vector<RegistrationResult> v_extrinsics;
 
-    for (const auto & entry : boost::filesystem::directory_iterator(dataset_folder)){
-        if(!boost::filesystem::is_directory(entry))
-            continue;
+    // for (const auto & entry : boost::filesystem::directory_iterator(dataset_folder)){
+    //     if(!boost::filesystem::is_directory(entry))
+    //         continue;
 
-        std::string scan_folder_path = entry.path().string() + "/lidar_lidar";
-        std::string lidar0_scan_folder = common::concatenateFolderAndFileName(scan_folder_path, "lidar0");
-        std::string lidar1_scan_folder = common::concatenateFolderAndFileName(scan_folder_path, "lidar1");
+    //     std::string scan_folder_path = entry.path().string() + "/lidar_lidar";
+        std::string lidar0_scan_folder = common::concatenateFolderAndFileName(dataset_folder, "lidar0");
+        std::string lidar1_scan_folder = common::concatenateFolderAndFileName(dataset_folder, "lidar1");
         std::vector<std::string> v_lidar0_pcl_paths,  v_lidar1_pcl_paths;
         std::vector<std::string> paths = {lidar0_scan_folder};
         common::getFileLists(paths, true, "ply", &v_lidar0_pcl_paths);
@@ -208,20 +221,20 @@ int main(int argc, char **argv){
         RegistrationResult regist_result;
         bool sts = alignTwoPointClouds(src_pcl_file_path, target_pcl_file_path, T_l0_l1_init, regist_result);
         if(!sts){
-            continue;
+            return -1;
         }
 
-        std::string save_file_path = common::concatenateFolderAndFileName(scan_folder_path, "lidar0_to_lidar1.yml");
+        std::string save_file_path = common::concatenateFolderAndFileName(output_folder, "lidar0_to_lidar1.yml");
         common::saveExtFileOpencv(save_file_path, regist_result.T);
         v_extrinsics.emplace_back(regist_result);
-    }
+    // }
 
     // sort result by fitness
-    std::sort(v_extrinsics.begin(), v_extrinsics.end(), [&](RegistrationResult &res_a, RegistrationResult &res_b){
-        return res_a.fitness > res_b.fitness;
-    });
+    // std::sort(v_extrinsics.begin(), v_extrinsics.end(), [&](RegistrationResult &res_a, RegistrationResult &res_b){
+    //     return res_a.fitness > res_b.fitness;
+    // });
 
-    evaluateExtrinsics(v_extrinsics, v_extrinsics[0].T);
+    // evaluateExtrinsics(v_extrinsics, v_extrinsics[0].T);
 
 
 

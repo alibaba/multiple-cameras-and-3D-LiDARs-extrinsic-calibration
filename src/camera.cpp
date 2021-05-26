@@ -7,6 +7,7 @@
 
 #include "camera.h"
 #include "common.h"
+#include "YamlFileIO.h"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>
@@ -33,35 +34,47 @@ bool Camera::readIntrinsicFile(const std::string &file_name)
     intrinsic_ = Eigen::Matrix3d::Identity();
     distortion_.resize(4);
 
-    cv::FileStorage fs(file_name, cv::FileStorage::READ);
-    if (!fs.isOpened())
-    {
-        ERROR_STREAM("[readIntrinsicFile] Fail to open " << file_name);
-        return false;
+    cv::Mat intrin_mat, distortion_mat;
+    int img_width, img_height;
+    std::string distortion_type;
+    if (!common::loadIntrinFileOpencv(file_name, intrin_mat, distortion_mat, distortion_type, img_width, img_height)){
+        if(!common::loadIntrinFileKalibr(file_name, intrin_mat, distortion_mat, distortion_type, img_width, img_height)){
+            return false;
+        }
     }
-
-    img_width_ = (int)fs["image_width"];
-    img_height_ = (int)fs["image_height"];
-
-    cv::Mat intrin_mat;
-    cv::Mat distortion_mat;
-    fs["camera_matrix"] >> intrin_mat;
-    fs["distortion_coefficients"] >> distortion_mat;
-
-    // intrinsic_num_ = std::max(distortion_mat.rows, distortion_mat.cols);
-
+    
     cv::cv2eigen(intrin_mat, intrinsic_);
     distortion_(0) = distortion_mat.at<double>(0, 0);
     distortion_(1) = distortion_mat.at<double>(0, 1);
     distortion_(2) = distortion_mat.at<double>(0, 2);
     distortion_(3) = distortion_mat.at<double>(0, 3);
+    img_width_ = img_width;
+    img_height_ = img_height;
 
-    fs.release();
+    // cv::FileStorage fs(file_name, cv::FileStorage::READ);
+    // if (!fs.isOpened())
+    // {
+    //     ERROR_STREAM("[readIntrinsicFile] Fail to open " << file_name);
+    //     return false;
+    // }
 
-    // DEBUG_STREAM("[readIntrinsicFile] intrinsic matrix :\n"
-    //              << intrinsic_);
-    // DEBUG_STREAM("[readIntrinsicFile] distortion vector :\n"
-    //              << distortion_.transpose());
+    // img_width_ = (int)fs["image_width"];
+    // img_height_ = (int)fs["image_height"];
+
+    // cv::Mat intrin_mat;
+    // cv::Mat distortion_mat;
+    // fs["camera_matrix"] >> intrin_mat;
+    // fs["distortion_coefficients"] >> distortion_mat;
+
+    // // intrinsic_num_ = std::max(distortion_mat.rows, distortion_mat.cols);
+    // cv::cv2eigen(intrin_mat, intrinsic_);
+    // distortion_(0) = distortion_mat.at<double>(0, 0);
+    // distortion_(1) = distortion_mat.at<double>(0, 1);
+    // distortion_(2) = distortion_mat.at<double>(0, 2);
+    // distortion_(3) = distortion_mat.at<double>(0, 3);
+
+    // fs.release();
+
     return true;
 }
 

@@ -11,6 +11,8 @@ import time
 import yaml
 import zipfile
 import re
+import cv2 as cv
+import numpy as np
 
 
 def write_pipeline_status(progress, success, error_step=str(), error_info=str()):
@@ -334,3 +336,23 @@ class SpotMetaItem:
         if not any(math.isnan(x) for x in self.rectify_pose):
             string_line += ' ' + ' '.join(str(x) for x in self.rectify_pose)
         return string_line
+
+def saveExtFileOpencv(filename, T_ext):
+    fs = cv.FileStorage(filename, cv.FileStorage_WRITE)
+    R = T_ext[:3, :3]
+    t = T_ext[:3, 3]
+    fs.write('extrinsic_rotation', R)
+    fs.write('extrinsic_translation', t)
+    fs.release()
+    return True
+
+def readExtFileOpencv(extrin_filepath):
+    fs = cv.FileStorage(extrin_filepath, cv.FileStorage_READ)
+    # rotation axis to camera
+    R_r_c = fs.getNode('extrinsic_rotation').mat()
+    t_r_c = fs.getNode('extrinsic_translation').mat()
+    T_r_c = np.identity(4, np.float)
+    T_r_c[:3, :3] = R_r_c
+    T_r_c[:3, 3] = t_r_c.T
+    fs.release()
+    return T_r_c

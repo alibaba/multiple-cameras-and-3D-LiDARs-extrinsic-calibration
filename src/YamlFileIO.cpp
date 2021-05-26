@@ -13,9 +13,15 @@ namespace common{
 
 bool loadExtFileOpencv(const std::string &file, Eigen::Matrix4d &T)
 {
-    cv::FileStorage fs(file, cv::FileStorage::READ);
-    if (!fs.isOpened())
+    cv::FileStorage fs;
+    try
     {
+        fs.open(file, cv::FileStorage::READ);
+
+    }catch(cv::Exception &ex){
+        std::cout << std::string(ex.what());
+        return false;
+    }catch(...){
         std::cout << "Fail to read " << file << std::endl;
         return false;
     }
@@ -147,9 +153,15 @@ bool loadIntrinFileOpencv(const std::string &file_name,
         return false;
     }
 
-    cv::FileStorage fsCamera(file_name, cv::FileStorage::READ);
-    if (!fsCamera.isOpened())
+    cv::FileStorage fsCamera;
+    try
     {
+        fsCamera.open(file_name, cv::FileStorage::READ);
+
+    }catch(cv::Exception &ex){
+        std::cout << std::string(ex.what());
+        return false;
+    }catch(...){
         std::cout << "invalid camera calibration file: " << file_name << "\n";
         return false;
     }
