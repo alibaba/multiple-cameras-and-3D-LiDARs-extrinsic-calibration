@@ -949,7 +949,8 @@ bool loadMonoCamParam(const std::string &cam_intrin_filepath, MonoCamParam &cam,
     }
     
     cv::cv2eigen(K, cam.intrinsic_);
-    cv::cv2eigen(D, cam.distortions_);
+    // D is type of (1, 4) matrix, while distortions_ is (4,1) matrix
+    cv::cv2eigen(D.t(), cam.distortions_);
     
     cam.img_width_ = width;
     cam.img_height_ = height;
