@@ -50,6 +50,43 @@ struct uint4
     uint32_t x, y, z, w;
 };
 
+
+class AccData
+{
+    public:
+    AccData( )
+    : a( 0.0 )
+    , t( 0.0 )
+    {
+    }
+    AccData( double data, double time )
+    : a( data )
+    , t( time )
+    {
+    }
+
+    double a;
+    double t;
+};
+
+class GyrData
+{
+    public:
+    GyrData( )
+    : w( 0.0 )
+    , t( 0.0 )
+    {
+    }
+    GyrData( double data, double time )
+    : w( data )
+    , t( time )
+    {
+    }
+
+    double w;
+    double t;
+};
+
 // use bounding box to verify camera pose computed by relocalizer
 struct MapBoundingBox
 {

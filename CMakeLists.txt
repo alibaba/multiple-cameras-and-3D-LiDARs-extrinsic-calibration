@@ -91,6 +91,10 @@ add_library(calibration SHARED
             src/stereo_calibration.cpp 
             src/teche_calibration.cpp 
             src/params_config.cpp 
+            src/acc_lib/allan_acc.cpp
+            src/acc_lib/fitallan_acc.cpp
+            src/gyr_lib/allan_gyr.cpp
+            src/gyr_lib/fitallan_gyr.cpp
             inc/cost_function.h)
 target_link_libraries(calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} ${CERES_LIBRARIES} relocalizer)
 
@@ -143,3 +147,7 @@ target_link_libraries(test_teche_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIE
 message("--Compilation of generate backpack yaml file")
 add_executable(test_generate_backpack_yaml ./test/test_gen_backpack_yaml.cpp)
 target_link_libraries(test_generate_backpack_yaml ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog common)
+
+message("--Compilation of calibration of imu")
+add_executable(test_imu_allan ./test/test_imu_allan.cpp)
+target_link_libraries(test_imu_allan ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} glog common calibration)

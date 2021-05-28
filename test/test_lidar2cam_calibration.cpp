@@ -40,7 +40,16 @@ void createLidarCamExtFile(const std::string& filepath, int lidar_id)
     T_l0_c0_gt.block<3, 3>(0, 0) = l0_c0_vec;
     T_l0_c0_gt.block<3, 1>(0, 3) = l0_c0_vec1.matrix() * t_l0_c0;
     // std::cout << "T_l0_c0_gt:\n" << T_l0_c0_gt << "\n";
-    common::saveExtFileOpencv(init_T_l0_c0_filepath, T_l0_c0_gt);   
+    common::saveExtFileOpencv(init_T_l0_c0_filepath, T_l0_c0_gt);  
+
+    Eigen::Matrix4d T_imu_l0_gt = Eigen::Matrix4d::Identity();
+    Eigen::AngleAxisd imu_l0_vec1(150 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
+    Eigen::AngleAxisd imu_l0_vec2(30 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
+    Eigen::Matrix3d imu_l0_vec = imu_l0_vec1.matrix() * imu_l0_vec2.matrix();
+    Eigen::Vector3d t_imu_l0(0.00044, 0.03407, 0.10148);
+    T_imu_l0_gt.block<3, 3>(0, 0) = imu_l0_vec;
+    T_imu_l0_gt.block<3, 1>(0, 3) = imu_l0_vec1.matrix() * t_imu_l0;
+    std::cout << "T_imu_l0_gt:\n" << T_imu_l0_gt << "\n";
 
     Eigen::Matrix4d T_l0_l1_gt = Eigen::Matrix4d::Identity();
     Eigen::AngleAxisd l0_l1_vec1(-30 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
