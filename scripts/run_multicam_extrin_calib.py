@@ -54,13 +54,13 @@ if __name__ == "__main__":
                         help='image prefix under cam0 folder')
     parser.add_argument('--cam1_idx', type=int, default=1,
                         help='image prefix under cam1 folder if the database folder is aim to stereo calibration')
-    parser.add_argument('--cam0_intrin_file', type=str, default='/data/cam0_avg_result.yaml',
+    parser.add_argument('--cam0_intrin_file', type=str, default='/data/cam0.yml',
                         help='camera0 intrinsic file')
-    parser.add_argument('--cam1_intrin_file', type=str, default='/data/cam1_avg_result.yaml',
+    parser.add_argument('--cam1_intrin_file', type=str, default='/data/cam1.yml',
                         help='camera1 intrinsic file')
-    parser.add_argument('--cam2_intrin_file', type=str, default='/data/cam2_avg_result.yaml',
+    parser.add_argument('--cam2_intrin_file', type=str, default='/data/cam2.yml',
                         help='camera2 intrinsic file')
-    parser.add_argument('--cam3_intrin_file', type=str, default='/data/cam3_avg_result.yaml',
+    parser.add_argument('--cam3_intrin_file', type=str, default='/data/cam3.yml',
                         help='camera3 intrinsic file')
 
     args = parser.parse_args()

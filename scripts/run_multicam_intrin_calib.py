@@ -18,7 +18,7 @@ def calib_mono_camera_intrin(calib_exe, ws_folder, raw_data_folder, output_folde
         return False
 
     cam_type = 'mono'
-    cmds = ['python', calib_exe, ws_folder, raw_data_folder, cam_type, output_folder, target_type]
+    cmds = ['python', calib_exe, ws_folder, raw_data_folder, cam_type, output_folder, '--target_type', target_type]
     print(cmds)
     if zrpc.map([cmds])[1] == 0:
         exit(-1)
@@ -97,17 +97,20 @@ if __name__ == "__main__":
 
     if cam_num == '1':
         for data_folder in data_folders_list:
-            cam0_datafolder_list.append(os.path.join(data_folder, 'cam0'))
+            cams_folder = os.path.join(data_folder, 'cams')
+            cam0_datafolder_list.append(os.path.join(cams_folder, 'cam0'))
     elif cam_num == '2':
         for data_folder in data_folders_list:
-            cam0_datafolder_list.append(os.path.join(data_folder, 'cam0'))
-            cam1_datafolder_list.append(os.path.join(data_folder, 'cam1'))
+            cams_folder = os.path.join(data_folder, 'cams')
+            cam0_datafolder_list.append(os.path.join(cams_folder, 'cam0'))
+            cam1_datafolder_list.append(os.path.join(cams_folder, 'cam1'))
     elif cam_num == '4':
         for data_folder in data_folders_list:
-            cam0_datafolder_list.append(os.path.join(data_folder, 'cam0'))
-            cam1_datafolder_list.append(os.path.join(data_folder, 'cam1'))
-            cam2_datafolder_list.append(os.path.join(data_folder, 'cam2'))
-            cam3_datafolder_list.append(os.path.join(data_folder, 'cam3'))
+            cams_folder = os.path.join(data_folder, 'cams')
+            cam0_datafolder_list.append(os.path.join(cams_folder, 'cam0'))
+            cam1_datafolder_list.append(os.path.join(cams_folder, 'cam1'))
+            cam2_datafolder_list.append(os.path.join(cams_folder, 'cam2'))
+            cam3_datafolder_list.append(os.path.join(cams_folder, 'cam3'))
 
     mv3dhelper.create_folder_if_not_exists(output_folder)
 

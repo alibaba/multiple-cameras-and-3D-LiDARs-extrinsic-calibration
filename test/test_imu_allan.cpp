@@ -245,6 +245,17 @@ int main(int argc, char **argv)
     int max_cluster = std::atoi(argv[4]);
     std::string output_folder = argv[5];
 
+    if (!common::fileExists(imu_filepath)){
+        LOG(FATAL) << "File does not exist :" << imu_filepath;
+        return -1;
+    }
+    if (!common::pathExists(output_folder)){
+        if (!common::createPath(output_folder)){
+            LOG(FATAL) << "Couldnot create output folder: " << output_folder;
+            return -1;
+        }
+    }
+
     imu::AllanGyr* gyr_x = new imu::AllanGyr("gyr x", max_cluster);
     imu::AllanGyr* gyr_y = new imu::AllanGyr("gyr y", max_cluster);
     imu::AllanGyr* gyr_z = new imu::AllanGyr("gyr z", max_cluster);
