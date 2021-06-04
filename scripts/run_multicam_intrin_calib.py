@@ -32,6 +32,8 @@ def eval_mono_camera_intrin(eval_exe, cam_res_list, cam_res_filepath, cam_analy_
     cam_type = 'mono'
     resfile_num = 3
     cmds = [eval_exe, cam_type, resfile_num, cam_res_list[0], cam_res_list[1], cam_res_list[2], cam_analy_filepath, cam_res_filepath]
+    # resfile_num = 2
+    # cmds = [eval_exe, cam_type, resfile_num, cam_res_list[0], cam_res_list[1], cam_analy_filepath, cam_res_filepath]
     print(cmds)
     if zrpc.map([cmds])[1] == 0:
         exit(-1)
@@ -159,19 +161,27 @@ if __name__ == "__main__":
     cam0_res_filepath = os.path.join(output_folder, 'cam0.yml')
     cam0_analy_filepath = os.path.join(output_folder, 'cam0_analysis.txt')
     eval_mono_camera_intrin(intrin_eval_exe, cam0_res_list, cam0_res_filepath, cam0_analy_filepath)
+    # cp data0/cams/cam0/kalibr/result/mono.yaml output_folder/cam0_chain.yaml
+    shutil.copy2(cam0_res_list[0], os.path.join(output_folder, 'cam0_chain.yaml'))
 
     cam1_res_filepath = os.path.join(output_folder, 'cam1.yml')
     cam1_analy_filepath = os.path.join(output_folder, 'cam1_analysis.txt')
     eval_mono_camera_intrin(intrin_eval_exe, cam1_res_list, cam1_res_filepath, cam1_analy_filepath)
+    # cp data0/cams/cam1/kalibr/result/mono.yaml output_folder/cam1_chain.yaml
+    shutil.copy2(cam1_res_list[0], os.path.join(output_folder, 'cam1_chain.yaml'))
 
     cam2_res_filepath = os.path.join(output_folder, 'cam2.yml')
     cam2_analy_filepath = os.path.join(output_folder, 'cam2_analysis.txt')
     eval_mono_camera_intrin(intrin_eval_exe, cam2_res_list, cam2_res_filepath, cam2_analy_filepath)
+    # cp data0/cams/cam2/kalibr/result/mono.yaml output_folder/cam2_chain.yaml
+    shutil.copy2(cam2_res_list[0], os.path.join(output_folder, 'cam2_chain.yaml'))
 
     cam3_res_filepath = os.path.join(output_folder, 'cam3.yml')
     cam3_analy_filepath = os.path.join(output_folder, 'cam3_analysis.txt')
     eval_mono_camera_intrin(intrin_eval_exe, cam3_res_list, cam3_res_filepath, cam3_analy_filepath)
-    
+    # cp data0/cams/cam3/kalibr/result/mono.yaml output_folder/cam3_chain.yaml
+    shutil.copy2(cam3_res_list[0], os.path.join(output_folder, 'cam3_chain.yaml'))
+
     timing_info.append(('Evaluate intrinsic calirbation result', time.time() - time_start))
     time_start = time.time()
 
