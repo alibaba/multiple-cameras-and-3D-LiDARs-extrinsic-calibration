@@ -16,8 +16,21 @@
 
 ## Quick Start
 
-1. Refer to [docker_useage.md](./docker_usage.md)
-2. 
+1. Building instruction:
+   
+   `git clone xxx`
+   
+   `cd xxx`
+   
+   `mkdir build && cd build`
+   
+   `cmake ..`
+   
+   `make -j8`
+   
+2. Download the [test data](https://drive.google.com/file/d/1aaWk44UUGWs6tE-ATOtT1qy7E_eiUQUu/view?usp=sharing).
+
+3. Refer to [docker_useage.md](./docker_usage.md) for further particular calibration task.
 
 
 
@@ -38,4 +51,4 @@ If you find this code is useful in your research, please cite:
 
 ## Acknowledgements
 
-Thanks to gaowenliang for opening source of his excellent works  [imu_utils](https://github.com/gaowenliang/imu_utils). Thanks to the Kalibr maintenance team of Kalibr for the well-known open-source project [Kalibr](https://github.com/ethz-asl/kalibr).
+Thanks to gaowenliang for opening source of his excellent works  [imu_utils](https://github.com/gaowenliang/imu_utils). Thanks to the maintenance team of Kalibr for the well-known open-source project [Kalibr](https://github.com/ethz-asl/kalibr).
