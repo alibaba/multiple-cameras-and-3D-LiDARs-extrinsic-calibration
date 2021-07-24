@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker build -t single-shot-calib:latest -f docker/Dockerfile .
