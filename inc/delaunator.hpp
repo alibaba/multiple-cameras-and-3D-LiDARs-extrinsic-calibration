@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CALIBRATION_INC_DELAUNATOR_H
+#define CALIBRATION_INC_DELAUNATOR_H
 
 #include <algorithm>
 #include <cmath>
@@ -583,3 +584,5 @@ void Delaunator::link(const std::size_t a, const std::size_t b) {
 }
 
 } //namespace delaunator
+
+#endif //

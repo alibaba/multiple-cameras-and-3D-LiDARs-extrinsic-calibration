@@ -1,6 +1,6 @@
 /**
  * @file teche_calibration.h
- * @author fangchuan.fc (fangchuan.fc@alibaba-inc.com)
+ * @author 
  * @brief This file is the header file of calibration for TECHE 360 ANYWHERE panorama camera.
  * We build the TECHE 360 panorama camera as the concentric axis rotated camera, which is formed by 4 cameras.
  * @date 2020-0618
