@@ -95,6 +95,6 @@ If you find this code is useful in your research, please cite:
 Thanks to gaowenliang for opening source of his excellent works  [imu_utils](https://github.com/gaowenliang/imu_utils). Thanks to the maintenance team of Kalibr for the well-known open-source project [Kalibr](https://github.com/ethz-asl/kalibr).
 
 ## License
-The source code is released under GPLv3 license.
+The source code is released under MIT license.
 
 We are still working on improving the performance and reliability of our codes. For any technical issues, please contact me via email <fang1457737815@gmail.com>.

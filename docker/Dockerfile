@@ -24,6 +24,7 @@ RUN wget -O opencv.zip https://github.com/opencv/opencv/archive/3.4.1.zip \
 RUN cd opencv-3.4.1 && mkdir build && cd build && \
     cmake -DCMAKE_BUILD_TYPE=Release WITH_QT=ON -DBUILD_opencv_apps=OFF -DBUILD_SHARED_LIBS=OFF -DBUILD_EXAMPLES=OFF  -DBUILD_DOCS=OFF -DBUILD_PERF_TESTS=OFF -DBUILD_TESTS=OFF .. && \
     make install -j$(nproc)
+RUN rm -rf /code/opencv_build/
 
 # google-glog & gflags BLAS & LAPACK & Eigen3 & SuiteSparse and CXSparse (optional)
 RUN apt-get install -y libgoogle-glog-dev libgflags-dev \
@@ -34,6 +35,7 @@ WORKDIR /code/eigen3_build
 RUN wget -O eigen3.tar.gz https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz
 RUN tar -xzf eigen3.tar.gz 
 RUN cd eigen-3.3.9 && mkdir build && cd build && cmake .. && make install -j$(nproc)
+RUN rm -rf /code/eigen3_build/
 
 # ceres solver
 WORKDIR /code/ceres_build
@@ -43,6 +45,7 @@ RUN wget -O ceres.zip https://github.com/ceres-solver/ceres-solver/archive/1.14.
  
 RUN cd ceres-solver-1.14.0 && mkdir build && cd build \
     && cmake .. && make install -j$(nproc)
+RUN rm -rf /code/ceres_build/
 
 # yaml-cpp
 WORKDIR /code/yaml_build
@@ -53,6 +56,8 @@ RUN wget -O yaml-cpp.zip https://github.com/jbeder/yaml-cpp/archive/refs/tags/ya
 RUN cd yaml-cpp-yaml-cpp-0.6.0/ && mkdir build && cd build \
     && cmake .. -DBUILD_SHARED_LIBS=ON && make install -j$(nproc)
 
+RUN rm -rf /code/yaml_build/
+
 # boost
 WORKDIR /code/boost_build
 
@@ -61,6 +66,7 @@ RUN wget -O boost.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.69
  
 RUN cd boost_1_69_0 && ./bootstrap.sh \
     && ./b2 install
+RUN rm -rf /code/boost_build/
 
 # cctag
 WORKDIR /code/cctag_build
@@ -69,12 +75,14 @@ RUN git clone https://github.com/fangchuan/CCTag.git && cd CCTag \
     && mkdir build && cd build \
     && cmake .. -DCCTAG_WITH_CUDA:BOOL=OFF -DBUILD_SHARED_LIBS=ON \
     && make install -j$(nproc)
+RUN rm -rf /code/cctag_build/
 
 # libpng 
 WORKDIR /code/libpng_build
 RUN wget -O libpng-1.6.37.tar.gz  https://github.com/glennrp/libpng/archive/refs/tags/v1.6.37.tar.gz \
      && tar -xvf libpng-1.6.37.tar.gz
 RUN cd libpng-1.6.37 && mkdir build && cd build && cmake .. && make install -j$(nproc)
+RUN rm -rf /code/libpng_build/
 
 # open3d
 WORKDIR /code/open3d_build
@@ -89,6 +97,7 @@ RUN apt-get --yes install python-dev python-tk || true \
             && apt-get --yes install python3-dev python3-tk || true
 RUN cd Open3D && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DENABLE_GUI=OFF .. \
     && make install -j$(nproc)
+RUN rm -rf /code/openc3d_build/
 
 
 #install scipy
