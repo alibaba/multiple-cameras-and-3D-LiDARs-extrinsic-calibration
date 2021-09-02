@@ -70,17 +70,25 @@ RUN git clone https://github.com/fangchuan/CCTag.git && cd CCTag \
     && cmake .. -DCCTAG_WITH_CUDA:BOOL=OFF -DBUILD_SHARED_LIBS=ON \
     && make install -j$(nproc)
 
+# libpng 
+WORKDIR /code/libpng_build
+RUN wget -O libpng-1.6.37.tar.gz  https://github.com/glennrp/libpng/archive/refs/tags/v1.6.37.tar.gz \
+     && tar -xvf libpng-1.6.37.tar.gz
+RUN cd libpng-1.6.37 && mkdir build && cd build && cmake .. && make install -j$(nproc)
 
 # open3d
-# WORKDIR /code/open3d_build
-# RUN apt install -y apt-utils
+WORKDIR /code/open3d_build
 # RUN git clone --recursive https://github.com/isl-org/Open3D.git && \
 #     cd Open3D && git checkout v0.10.0 \
-#     && git submodule update --init --recursive \
-#     && util/scripts/install-deps-ubuntu.sh assume-yes
+#     && git submodule update --init --recursive 
+#     # && util/scripts/install-deps-ubuntu.sh assume-yes
+RUN git clone --recursive https://github.com/fangchuan/Open3D.git && \
+    cd Open3D && git submodule update --init --recursive 
 
-# RUN cd Open3D && mkdir build && cd build && cmake -DENABLE_GUI=OFF .. \
-#     && make install -j$(nproc)
+RUN apt-get --yes install python-dev python-tk || true \
+            && apt-get --yes install python3-dev python3-tk || true
+RUN cd Open3D && mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DENABLE_GUI=OFF .. \
+    && make install -j$(nproc)
 
 
 #install scipy
@@ -91,56 +99,6 @@ RUN /bin/bash -c '. /opt/ros/kinetic/setup.sh'
 
 WORKDIR /code/calibration 
 ADD . .
-
-# ln -s /usr/lib/x86_64-linux-gnu/libgtk-x11-2.0.so.0
-# ln -s /usr/lib/x86_64-linux-gnu/libfreetype.so.6 /usr/lib/x86_64-linux-gnu/libfreetype.so
-# ln -s /usr/lib/x86_64-linux-gnu/libgdk-x11-2.0.so.0
-# ln -s /usr/lib/x86_64-linux-gnu/libcairo.so.2
-# /usr/lib/x86_64-linux-gnu/libfontconfig.so.1
-# /usr/lib/x86_64-linux-gnu/libpangoft2-1.0.so.0
-# /usr/lib/x86_64-linux-gnu/libgdk_pixbuf-2.0.so.0
-# /usr/lib/x86_64-linux-gnu/libpango-1.0.so.0
-# /usr/lib/x86_64-linux-gnu/libvtkRenderingOpenGL-6.2.so.6.2
-# /usr/bin/ld: cannot find -lvtkImagingHybrid
-# /usr/bin/ld: cannot find -lvtkIOImage
-# /usr/bin/ld: cannot find -lvtkCommonDataModel
-# /usr/bin/ld: cannot find -lvtkCommonMath
-# /usr/bin/ld: cannot find -lvtkCommonCore
-# /usr/bin/ld: cannot find -lvtksys
-# /usr/bin/ld: cannot find -lvtkCommonMisc
-# /usr/bin/ld: cannot find -lvtkCommonSystem
-# /usr/bin/ld: cannot find -lvtkCommonTransforms
-# /usr/bin/ld: cannot find -lvtkCommonExecutionModel
-# /usr/bin/ld: cannot find -lvtkDICOMParser
-# /usr/bin/ld: cannot find -lvtkIOCore
-# /usr/bin/ld: cannot find -lvtkmetaio
-# /usr/bin/ld: cannot find -lvtkImagingCore
-# /usr/bin/ld: cannot find -lvtkRenderingCore
-# /usr/bin/ld: cannot find -lvtkCommonColor
-# /usr/bin/ld: cannot find -lvtkFiltersExtraction
-# /usr/bin/ld: cannot find -lvtkFiltersCore
-# /usr/bin/ld: cannot find -lvtkFiltersGeneral
-# /usr/bin/ld: cannot find -lvtkCommonComputationalGeometry
-# /usr/bin/ld: cannot find -lvtkFiltersStatistics
-# /usr/bin/ld: cannot find -lvtkImagingFourier
-# /usr/bin/ld: cannot find -lvtkalglib
-# /usr/bin/ld: cannot find -lvtkFiltersGeometry
-# /usr/bin/ld: cannot find -lvtkFiltersSources
-# /usr/bin/ld: cannot find -lvtkInteractionStyle
-# /usr/bin/ld: cannot find -lvtkRenderingLOD
-# /usr/bin/ld: cannot find -lvtkFiltersModeling
-# /usr/bin/ld: cannot find -lvtkIOPLY
-# /usr/bin/ld: cannot find -lvtkIOGeometry
-# /usr/bin/ld: cannot find -lvtkFiltersTexture
-# /usr/bin/ld: cannot find -lvtkRenderingFreeType
-# /usr/bin/ld: cannot find -lvtkftgl
-# /usr/bin/ld: cannot find -lvtkIOExport
-# /usr/bin/ld: cannot find -lvtkRenderingAnnotation
-# /usr/bin/ld: cannot find -lvtkImagingColor
-# /usr/bin/ld: cannot find -lvtkRenderingContext2D
-# /usr/bin/ld: cannot find -lvtkRenderingGL2PS
-# /usr/bin/ld: cannot find -lvtkRenderingContextOpenGL
-# /usr/bin/ld: cannot find -lvtkRenderingLabel
 
 # ADD docker/calib-entrypoint.sh /calib-entrypoint.sh
 # ENTRYPOINT [ "/calib-entrypoint.sh" ]
