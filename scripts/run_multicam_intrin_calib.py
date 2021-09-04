@@ -30,10 +30,10 @@ def eval_mono_camera_intrin(eval_exe, cam_res_list, cam_res_filepath, cam_analy_
         return False
     
     cam_type = 'mono'
-    resfile_num = 3
-    cmds = [eval_exe, cam_type, resfile_num, cam_res_list[0], cam_res_list[1], cam_res_list[2], cam_analy_filepath, cam_res_filepath]
-    # resfile_num = 2
-    # cmds = [eval_exe, cam_type, resfile_num, cam_res_list[0], cam_res_list[1], cam_analy_filepath, cam_res_filepath]
+    # resfile_num = 3
+    # cmds = [eval_exe, cam_type, resfile_num, cam_res_list[0], cam_res_list[1], cam_res_list[2], cam_analy_filepath, cam_res_filepath]
+    resfile_num = 2
+    cmds = [eval_exe, cam_type, resfile_num, cam_res_list[0], cam_res_list[1], cam_analy_filepath, cam_res_filepath]
     print(cmds)
     if zrpc.map([cmds])[1] == 0:
         exit(-1)

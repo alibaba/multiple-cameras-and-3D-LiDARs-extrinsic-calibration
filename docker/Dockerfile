@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     build-essential \
     curl  \
     wget \
-    unzip
+    unzip \
+    vim
 
 # update cmake to version 3.14
 RUN wget -O cmake-3.14.tar.gz https://cmake.org/files/v3.14/cmake-3.14.0-rc2-Linux-x86_64.tar.gz
@@ -108,6 +109,10 @@ RUN /bin/bash -c '. /opt/ros/kinetic/setup.sh'
 
 WORKDIR /code/calibration 
 ADD . .
-
+RUN mkdir -p build \
+    && cd build \
+    && rm -rf * \
+    && cmake .. \
+    && make -j8
 # ADD docker/calib-entrypoint.sh /calib-entrypoint.sh
 # ENTRYPOINT [ "/calib-entrypoint.sh" ]
