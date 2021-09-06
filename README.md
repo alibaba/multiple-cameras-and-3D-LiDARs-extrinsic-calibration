@@ -12,7 +12,7 @@
 
  This paper is accpeted in 2021 IROS, the preprint version is accessible in [arXiv](https://arxiv.org/abs/2103.12941).  In this paper, we propose a single-shot solution for calibrating extrinsic transformations among multiple cameras and 3D LiDARs. We establish a panoramic infrastructure, in which a camera or LiDAR can be robustly localized using data from single frame. Experiments are conducted on three devices with different camera-LiDAR configurations, showing that our approach achieved comparable calibration accuracy with the state-of-the-art approaches but with much greater efficiency.
 
-![image-20210724161755730](/Users/chuanfang/projects/vlab/VCalib/assets/image-20210724161755730.png)
+![image-20210724161755730](./assets/image-20210724161755730.png)
 
 
 
