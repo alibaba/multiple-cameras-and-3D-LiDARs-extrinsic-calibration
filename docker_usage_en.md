@@ -1,7 +1,7 @@
 	In order to standardize the multi-sensor calibration work, we integrate all the algorithms, scripts and tools used in the calibration procedure into a Docker image, to facilitate the deployment of the calibration work in the process of mass production.
-**Support Calibration Task**:
+**Support **:
 
-In scripts/ folder, we implement several python scripts to support following  calirbation task:
+Based on the  **Single-Shot Calibration**,  we implement several python scripts to support following  calirbation task:
 
 * camera intrinsic calibration;
 * Multi-cam intrinsic and extrinsic calibration;
@@ -38,10 +38,13 @@ xhost +local:root
 docker run -it -e "DISPLAY" \
                -e "QT_X11_NO_MITSHM=1" \
                -v "/tmp/.X11-unix:/tmp/.X11-unix:rw" \
-               -v /path/to/single-shot-calibration:/code/calirbation \
+               -v /path/to/code:/code/calirbation \
                -v /media/ziqianbai/DATA:/data \
-               calibration-docker:latest /bin/bash
-# 
+               single-shot-calib:latest /bin/bash
+# compile source code
+cd /code/calibration && mkdir build && cd build
+cmake .. && make -j8
+# cd scripts folder
 cd /code/calirbation/scripts
 ```
 
@@ -56,8 +59,12 @@ open -a XQuartz
 IP=$(ifconfig en0 | grep inet | awk '$1=="inet" {print $2}')
 xhost + $IP
 # mount the data path and code path
-docker run -it -e DISPLAY=$IP:0 -v "/tmp/.X11-unix:/tmp/.X11-unix:rw" -v /media/ziqianbai/DATA:/data -v /path/to/single-shot-calibration:/code/calirbation \ calibration-docker:latest /bin/bash 
+docker run -it -e DISPLAY=$IP:0 -v "/tmp/.X11-unix:/tmp/.X11-unix:rw" -v /media/ziqianbai/DATA:/data -v /path/to/code:/code/calirbation \ single-shot-calib:latest /bin/bash 
 
+# compile source code
+cd /code/calibration && mkdir build && cd build
+cmake .. && make -j8
+# cd scripts folder
 cd /code/calirbation/scripts
 ```
 
@@ -107,7 +114,7 @@ python run_cam_intrin_calib.py /code/kalibr_calibration \
                               --target_type apriltag
 ```
 output file: output_folder/result/stereo.yaml;
- 
+
 
 
 3. **multi-cam**：

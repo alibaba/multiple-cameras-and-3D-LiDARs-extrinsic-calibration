@@ -59,11 +59,11 @@ Run docker with outr test data, please refer to [docker_usage_en.md](./docker_us
 
 ## Quick Start
 
-1. Build the source code:
+1. Build the source code in **Ubuntu 16.04**/**Ubuntu 18.04**:
   
    ```bash
-   git clone xxx
-   cd xxx
+   git clone https://github.com/alibaba/multiple-cameras-and-3D-LiDARs-extrinsic-calibration.git
+   cd multiple-cameras-and-3D-LiDARs-extrinsic-calibration
    mkdir build && cd build
    cmake ..
    make -j8
@@ -71,7 +71,7 @@ Run docker with outr test data, please refer to [docker_usage_en.md](./docker_us
    
 2. Download the [test data](https://drive.google.com/file/d/1aaWk44UUGWs6tE-ATOtT1qy7E_eiUQUu/view?usp=sharing).
 
-3. Refer to [docker_useage_en.md](./docker_usage_en.md) for further particular calibration task.
+3. Build the source code in docker, refer to [docker_useage_en.md](./docker_usage_en.md) for further tutorial.
 
 
 
