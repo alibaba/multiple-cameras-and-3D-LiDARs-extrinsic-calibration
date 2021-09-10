@@ -4,7 +4,8 @@
 
 ## Updates
 
-* [2021/07/21] first commit; Given sparse map of panoramic infrastructure, we can easily calibrate the extrinsics among multi-camera and multi-LiDAR. In order to facilitate camera intrinsic calibration and imu calibration, [Kalibr toolbox](https://github.com/ethz-asl/kalibr) is used in our scripts, and [imu_utils](https://github.com/gaowenliang/imu_utils) code is  simplified in our source code.
+* [2021/09/01] first commit, source code of localization and calibration stage; Given sparse map of panoramic infrastructure, we can easily calibrate the extrinsics among multi-camera and multi-LiDAR. In order to facilitate camera intrinsic calibration and imu calibration, [Kalibr toolbox](https://github.com/ethz-asl/kalibr) is used in our scripts, and [imu_utils](https://github.com/gaowenliang/imu_utils) code is  simplified in our source code. 
+* [2021/10/01] source code of panoramic infrastructure reconstruction; coming soon...
 
 
 
