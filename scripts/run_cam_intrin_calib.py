@@ -6,6 +6,7 @@ import argparse
 import mv3dhelper
 import zrpc
 import time
+from PIL import Image
 
 
 def help_information():
@@ -26,7 +27,7 @@ if __name__ == "__main__":
     parser.add_argument('output_folder', type=str, default='',
                         help='the folder of output files')
     parser.add_argument('--target_type', type=str,
-                        default='checkerboard', help='target type')
+                        default='apriltag', help='target type')
     parser.add_argument('--extension', type=str, default='.jpg',
                         help='the extension of image under dataset folder')
     parser.add_argument('--dist_model', type=str, default='pinhole-equi',
@@ -35,6 +36,7 @@ if __name__ == "__main__":
                         help=' whether show feature extraction or not')
     parser.add_argument('--cam0_idx', type=int, default=0, help='image prefix under cam0 folder')
     parser.add_argument('--cam1_idx', type=int, default=1, help='image prefix under cam1 folder if the database folder is aim to stereo calibration')
+    parser.add_argument('--rotate_180', type=bool, default=False, help='image prefix under cam1 folder if the database folder is aim to stereo calibration')
 
     args = parser.parse_args()
     ws_folder = args.ws_folder
@@ -111,13 +113,23 @@ if __name__ == "__main__":
         src_img0_path = os.path.join(raw_cam0_folder, cam0_img_list[img_idx])
         ts = int(time.time() * 1e9)
         dst_img0_path = os.path.join(out_cam0_folder, str(ts) + img_extension)
-        shutil.copyfile(src_img0_path, dst_img0_path)
+        if args.rotate_180:
+            img = Image.open(src_img0_path)
+            rot_img = img.transpose(Image.ROTATE_180)
+            rot_img.save(dst_img0_path)
+        else:
+            shutil.copyfile(src_img0_path, dst_img0_path)
         print(dst_img0_path)
 
         if cam_type == "stereo":
             src_img1_path = os.path.join(raw_cam1_folder, cam1_img_list[img_idx])
             dst_img1_path = os.path.join(out_cam1_folder, str(ts) + img_extension)
-            shutil.copyfile(src_img1_path, dst_img1_path)
+            if args.rotate_180:
+                img = Image.open(src_img1_path)
+                rot_img = img.transpose(Image.ROTATE_180)
+                rot_img.save(dst_img1_path)
+            else:
+                shutil.copyfile(src_img1_path, dst_img1_path)
         time.sleep(0.03)
 
     # calibrate camera intrinsic and extrinsic with kalibr toolkits
@@ -135,11 +147,11 @@ if __name__ == "__main__":
     # run kalibr_calibrate_cameras
     os.chdir(res_folder)
     if cam_type == 'mono':
-        # kalibr_calibrate_cameras --target ${target_file} --dont-show-report  --bag ${bag_file} --models ${cam_model} --topics /cam0/image_raw #--show-extraction
+        # kalibr_calibrate_cameras --target ${target_file} --dont-show-report  --bag ${bag_file} --models ${cam_model} --topics /cam0/image_raw 
         cmds = [kalibr_calib_exe, '--target', target_filepath, '--dont-show-report', '--models', cam_model,
                 '--bag', out_bag_filepath, '--topics', '/cam0/image_raw']
     if cam_type == 'stereo':
-        # kalibr_calibrate_cameras --target ${target_file} --dont-show-report --bag ${bag_file} --models ${cam_model} ${cam_model} --topics /cam0/image_raw /cam1/image_raw
+        # kalibr_calibrate_cameras --target ${target_file} --dont-show-report --bag ${bag_file} --models ${cam_model} ${cam_model} --topics /cam0/image_raw /cam1/image_raw , '--show-extraction'
         cmds = [kalibr_calib_exe, '--target', target_filepath, '--dont-show-report', '--models', cam_model, cam_model,
                 '--bag', out_bag_filepath, '--topics', '/cam0/image_raw', '/cam1/image_raw']
     if b_show_extract:

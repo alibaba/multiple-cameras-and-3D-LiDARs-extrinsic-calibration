@@ -18,7 +18,7 @@ def help_information():
         '''<dataset_folder>:  e.g.https://yuque.antfin-inc.com/aone857851/udonh7/bmazpr''')
 
 
-def copyAndRenameRawData(raw_cam_folder, raw_imu_file, img_list, out_cam_folder, out_imu_file):
+def copyAndRenameCamData(raw_cam_folder, img_list, out_cam_folder):
 
     raw_cam_tms_filepath = glob.glob(os.path.join(raw_cam_folder, 'timestamp*.txt'))[0]
     if not os.path.exists(raw_cam_tms_filepath):
@@ -26,9 +26,7 @@ def copyAndRenameRawData(raw_cam_folder, raw_imu_file, img_list, out_cam_folder,
         exit(-1)
 
     # the raw image tms unit is s, then we cvt it into ns
-    img_tms = mv3dhelper.readImageTms(raw_cam_tms_filepath)
-    # the raw imu tms unit is ms
-    imu_data = mv3dhelper.readImuData(raw_imu_file)
+    img_tms = mv3dhelper.readImageTms(raw_cam_tms_filepath, device='SIM')
 
     # copy images to out_cam_folder
     delim_pattern = r'\_|\.'
@@ -40,14 +38,18 @@ def copyAndRenameRawData(raw_cam_folder, raw_imu_file, img_list, out_cam_folder,
 
         shutil.copyfile(src_img_path, dst_img_path)
 
+def copyAndRenameImuData(raw_imu_file, out_imu_file):
+    # the raw imu tms unit is ms
+    imu_data = mv3dhelper.readImuData(raw_imu_file)
+
     # reorder imu data
     new_imu_datas = []
     for data in imu_data:
         # timestamp: ms
         imu_timestamp = float(data[0])
         # if imu_timestamp >= img_start_timestamps:
-        # the raw imu tms unit is ms, then we cvt it into ns
-        new_imu_tuple = (int(imu_timestamp*1000000), data[4], data[5],
+        # the raw imu tms unit is us, then we cvt it into ns
+        new_imu_tuple = (int(imu_timestamp*1000), data[4], data[5],
                          data[6], data[1], data[2], data[3])
         new_imu_datas.append(new_imu_tuple)
 
@@ -59,16 +61,19 @@ def copyAndRenameRawData(raw_cam_folder, raw_imu_file, img_list, out_cam_folder,
         f_csv.writerows(new_imu_datas)
 
 # calibrate extrinsic between camera and imu, return camera_to_imu.yaml
-def calibCamImuExt(data_folder, output_folder, target_filepath, imu_yaml_file, cam_chain_yaml_file, img_extension, b_show_extract, cam0_idx):
+def calibCamImuExt(data_folder, output_folder, target_filepath, imu_yaml_file, cam_chain_yaml_file, img_extension, b_show_extract, cam_type, cam0_idx, cam1_idx):
     
     raw_imu_file = os.path.join(data_folder, 'imu_0.txt')
-    raw_cam_folder = os.path.join(data_folder, 'cam'+str(cam0_idx))
+    raw_cam0_folder = os.path.join(data_folder, 'cam'+str(cam0_idx))
+    if cam_type == 'stereo':
+        raw_cam0_folder = os.path.join(data_folder, 'stereo/cam'+str(cam0_idx))
+        raw_cam1_folder = os.path.join(data_folder, 'stereo/cam'+str(cam1_idx))
 
     if not os.path.exists(raw_imu_file):
         print('{} doesnot exist!'.format(raw_imu_file))
         exit(-1)
-    if not os.path.exists(raw_cam_folder):
-        print('{} doesnot exist!'.format(raw_cam_folder))
+    if not os.path.exists(raw_cam0_folder):
+        print('{} doesnot exist!'.format(raw_cam0_folder))
         exit(-1)
 
     mv3dhelper.create_folder_if_not_exists(output_folder)
@@ -77,23 +82,33 @@ def calibCamImuExt(data_folder, output_folder, target_filepath, imu_yaml_file, c
     kalibr_cam_imu_exe = 'kalibr_calibrate_imu_camera'
     # sort image
     cam0_img_prefix = str(cam0_idx)+'_'
-    cam0_img_list = mv3dhelper.sort_rename_images(raw_cam_folder, cam0_img_prefix, 'image_', img_extension)
+    cam0_img_list = mv3dhelper.sort_rename_images(raw_cam0_folder, cam0_img_prefix, 'image_', img_extension)
+    if cam_type == 'stereo':
+        cam1_img_list = mv3dhelper.sort_rename_images(raw_cam1_folder, cam0_img_prefix, 'image_', img_extension)
 
     # copy and rename images according to timestamp
     out_cam0_folder = os.path.join(output_folder, 'data/cam0')
+    out_cam1_folder = os.path.join(output_folder, 'data/cam1')
     out_imu_file = os.path.join(output_folder, 'data/imu0.csv')
     res_folder = os.path.join(output_folder, 'result')
     out_bag_filepath = os.path.join(res_folder, 'output.bag')
 
     if os.path.exists(out_cam0_folder):
         shutil.rmtree(out_cam0_folder)
+    if os.path.exists(out_cam1_folder):
+        shutil.rmtree(out_cam1_folder)
     if os.path.exists(out_imu_file):
         os.remove(out_imu_file)
     if os.path.exists(res_folder):
         shutil.rmtree(res_folder)
     os.makedirs(out_cam0_folder)
+    if cam_type == 'stereo':
+        os.makedirs(out_cam1_folder)
 
-    copyAndRenameRawData(raw_cam_folder, raw_imu_file, cam0_img_list, out_cam0_folder, out_imu_file)
+    copyAndRenameCamData(raw_cam0_folder, cam0_img_list, out_cam0_folder)
+    if cam_type == 'stereo':
+        copyAndRenameCamData(raw_cam1_folder, cam1_img_list, out_cam1_folder)
+    copyAndRenameImuData(raw_imu_file, out_imu_file)
 
     # create rosbag
     mv3dhelper.create_folder_if_not_exists(res_folder)
@@ -169,18 +184,22 @@ if __name__ == "__main__":
                         help='the input dataset folder')
     parser.add_argument('output_folder', type=str, default='',
                         help='the folder of output files')
+    parser.add_argument('--cam_type', type=str, default='mono',
+                        help="the camera type: mono or stereo")
     parser.add_argument('imu_yaml_file', type=str,
                         default='', help='the imu intrinsic file')
     parser.add_argument('cam_chain_yaml_file', type=str,
                         default='', help='the camera chain file')
     parser.add_argument('--target_type', type=str,
-                        default='checkerboard', help='target type')
+                        default='apriltag', help='target type')
     parser.add_argument('--extension', type=str, default='.jpg',
                         help='the extension of image under dataset folder')
     parser.add_argument('--show_extraction', type=bool, default=False,
                         help=' whether show feature extraction or not')
     parser.add_argument('--cam0_idx', type=int, default=0,
                         help='image prefix under cam0 folder')
+    parser.add_argument('--cam1_idx', type=int, default=1,
+                        help='image prefix under cam1 folder')
 
     args = parser.parse_args()
     ws_folder = args.ws_folder
@@ -195,11 +214,20 @@ if __name__ == "__main__":
         print('{} doesnot exist!'.format(cam_chain_yaml_file))
         exit(-1)
 
+    if args.cam_type == 'mono':
+        cam_type = 'mono'
+    elif args.cam_type == 'stereo':
+        cam_type = 'stereo'
+    else:
+        print('Invalid camera type {}'.format(args.cam_type))
+        exit(-1)
+
     # extension of image
     img_extension = args.extension
     b_show_extract = args.show_extraction
     # image prefix under cam0 folder
     cam0_idx = args.cam0_idx
+    cam1_idx = args.cam1_idx
 
     # target filepath
     if args.target_type == 'checkerboard':
@@ -223,7 +251,7 @@ if __name__ == "__main__":
     for folder in raw_data_folder_list:
         data_folder = os.path.join(folder, 'cam-imu')
         res_folder = os.path.join(data_folder, 'kalibr')
-        T_cam_imu_file = calibCamImuExt(data_folder, res_folder, target_filepath, imu_yaml_file, cam_chain_yaml_file, img_extension, b_show_extract, cam0_idx)
+        T_cam_imu_file = calibCamImuExt(data_folder, res_folder, target_filepath, imu_yaml_file, cam_chain_yaml_file, img_extension, b_show_extract, cam_type, cam0_idx, cam1_idx)
         T_ext = readCamImuExtFileKalir(T_cam_imu_file)
         T_cam_imu_list.append(T_ext)
         
@@ -232,9 +260,9 @@ if __name__ == "__main__":
         time_start = time.time()
 
 
-    T_avg = evalExtrinsics(T_cam_imu_list)
-    avg_res_filepath = os.path.join(output_folder, 'camera'+ str(cam0_idx)+'_to_imu.yaml')
-    mv3dhelper.saveExtFileOpencv(avg_res_filepath, T_avg)
+    # T_avg = evalExtrinsics(T_cam_imu_list)
+    # avg_res_filepath = os.path.join(output_folder, 'camera'+ str(cam0_idx)+'_to_imu.yaml')
+    # mv3dhelper.saveExtFileOpencv(avg_res_filepath, T_avg)
 
     print('------------------------------')
     for info in timing_info:

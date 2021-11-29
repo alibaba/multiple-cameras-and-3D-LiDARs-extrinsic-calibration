@@ -20,7 +20,7 @@ bool b_start_rec_data = true;
 // start receiving data time
 double start_t;
 bool b_end_rec_data = false;
-const double k_tms_unit = 1000.0;
+const double k_tms_unit = 1000000.0;
 
 bool loadRawImuData(const std::string &imu_filepath, imu::AllanGyr *gyr_x_ptr, imu::AllanGyr *gyr_y_ptr, imu::AllanGyr *gyr_z_ptr, 
                     imu::AllanAcc *acc_x_ptr, imu::AllanAcc *acc_y_ptr, imu::AllanAcc *acc_z_ptr, int max_time_min){
