@@ -80,6 +80,31 @@ def copyRGBImages(raw_rgb_folder, new_rgb_folder):
 
     return True
 
+def convImuData(raw_imu_filepath, conv_imu_filepath):
+    new_imu_data = []
+    # raw file format
+    # timestmap(us) acc_x acc_y acc_z(G) gyr_x gyr_y gyr_z(rad/s) 
+    # target file format
+    # timestamp(ns) gyro_x  gyro_y  gyro_z(rad/s) acc_x  acc_y  acc_z(m/s^2)  
+    with open(raw_imu_filepath, 'r') as raw_file:
+        all_lines = raw_file.readlines()
+        for line in all_lines:
+            raw_data = line.split()
+            tms = raw_data[0]
+            ax = str(float(raw_data[1]) * 9.81)
+            ay = str(float(raw_data[2]) * 9.81)
+            az = str(float(raw_data[3]) * 9.81)
+            gx = raw_data[4]
+            gy = raw_data[5]
+            gz = raw_data[6]
+            new_imu_data.append([tms, gx, gy, gz, ax, ay, az])
+
+    with open(conv_imu_filepath, 'w') as new_file:
+        for data in new_imu_data:
+            new_file.write(' '.join(data))
+            new_file.write('\n')
+
+    return True
 
 def main():
     parser = argparse.ArgumentParser(description="A helper to preprocess raw data capture from xvision")
@@ -115,7 +140,8 @@ def main():
 
     new_imu_filepath = os.path.join(output_folder, 'imu_0.txt')
     if os.path.exists(raw_imu_filepath):
-        shutil.copyfile(raw_imu_filepath, new_imu_filepath)
+        # shutil.copyfile(raw_imu_filepath, new_imu_filepath)
+        convImuData(raw_imu_filepath, new_imu_filepath)
 
 if __name__ == '__main__':
     main()
