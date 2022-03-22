@@ -1,8 +1,8 @@
 /**
- * @file teche_calibration.h
+ * @file ladybug5_calibration.h
  * @author 
- * @brief This file is the header file of calibration for TECHE 360 ANYWHERE panorama camera.
- * We build the TECHE 360 panorama camera as the concentric axis rotated camera, which is formed by 4 cameras.
+ * @brief This file is the header file of calibration for Ladybug5+ panorama camera.
+ * We build the Ladybug5+ 360 panorama camera as the concentric axis rotated camera, which is formed by 5 cameras.
  * @date 2020-0618
  *
  * @copyright Copyright (c) Alibaba Inc 2020. All rights reserved.
@@ -23,15 +23,15 @@
 #include "camera.h"
 #include "mono_calibration.h"
 
-class TecheCalibrator
+class LadybugCalibrator
 {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    TecheCalibrator() = delete;
+    LadybugCalibrator() = delete;
 
     /**
-   * @brief Stereo camera calibrator, made up of the left camera and right camera.
+   * @brief Panoramic camera calibrator, made up of 5 camera which consists a ring.
    * @param camModelType is camera model type.
    * @param targetModelType is target board type.
    * @param leftIntrinsicFileName is left camera intrinsic file name.
@@ -39,7 +39,7 @@ public:
    * @param targetFileName is target board config file name.
    * @param camera_num is the camera number(rotation angles).
    */
-    explicit TecheCalibrator(camera::model_type_t camModelType,
+    explicit LadybugCalibrator(camera::model_type_t camModelType,
                              target::target_type_t targetModelType,
                              const std::vector<std::string> &camIntrinsicFileNames,
                              const std::string &targetFileName,
@@ -47,8 +47,8 @@ public:
 
     /**
    * @brief Add calibration data, calibration pattern is CCTAG.
-   * @param imgFilePaths is calibration image file path, imgFilePath.size() == 4.
-   * @param centers is extracted cctag centers, centers.size() == 4.
+   * @param imgFilePaths is calibration image file path, imgFilePath.size() == 5.
+   * @param centers is extracted cctag centers, centers.size() == 5.
    * @return .
    */
     bool addCctagData(const std::vector<std::string> &imgFilePaths, const std::vector<std::vector<cv::Point2d>> &centers);
@@ -99,7 +99,7 @@ private:
 
     //
     const unsigned int cam_num_;
-    // calibrator pointer for 4 cameras
+    // calibrator pointer for 5 cameras
     std::vector<MonoCalibrator::Ptr> v_cam_calibrator_ptrs_;
 
     // target board pointer
@@ -112,7 +112,7 @@ private:
     Eigen::Vector3d global_rotation_axis_;
 
     // camera pose  in r2c form( rotation axis 2 camera )
-    // transform points of rotation axis frame into camera frame
+    // transform points from camera frame to rotation axis frame.
     std::vector<Eigen::Matrix4d> v_cam_pose_r_c_;
 };
 

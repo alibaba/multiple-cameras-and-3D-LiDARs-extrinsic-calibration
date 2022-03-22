@@ -109,18 +109,10 @@ int main(int argc, char **argv)
     std::string yml_filepath = output_folder + "/camera"+ std::to_string(cam0_idx) + "_to_camera"+ std::to_string(cam1_idx) +".yml";
     common::saveExtFileOpencv(yml_filepath, T_cam0_cam1);
 
-    // //  visualize calibration result
-    // std::vector<std::pair<Eigen::Matrix4d, Eigen::Matrix4d>> v_cam_pose_pairs = stereo_calibrator.validCameraPosePairs();
-    // std::vector<StereoFrame> v_visual_frames;
-    // for (size_t i = 0; i < v_cam_pose_pairs.size(); ++i)
-    // {
-    //     StereoFrame sf(i);
-    //     sf.v_T_wc[0] = v_cam_pose_pairs[i].first;
-    //     sf.v_T_wc[1] = v_cam_pose_pairs[i].second;
-    //     v_visual_frames.emplace_back(sf);
-    // }
+    std::vector<std::pair<Eigen::Matrix4d, Eigen::Matrix4d>> v_cam_poses_w2c = stereo_calibrator.validCameraPosePairs();
 
 #ifdef VISUALIZE_TRAJECTORY
+    std::vector<Eigen::Matrix4d> v_visual_frames = {v_cam_poses_w2c[0].first, v_cam_poses_w2c[0].second};
     Viewer viewer(v_visual_frames);
     std::vector<Eigen::Vector3d> v_map_points = stereo_calibrator.objectPoints();
     viewer.setCurrentMapPoints(v_map_points);

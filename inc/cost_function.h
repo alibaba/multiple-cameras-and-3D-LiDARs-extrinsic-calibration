@@ -113,7 +113,6 @@ struct ReprojectionErrorWithConcentricConstrain
         // 1 is dimension of rotation angle
         // 3 is the dimension of rotaion delta vector
         // 6 is the dimension of R_cw_0 and t_cw_0
-        // 4 is the dimension of camera intrinsic
         return (new ceres::AutoDiffCostFunction<ReprojectionErrorWithConcentricConstrain, 3, 3, 1, 3, 6>(
             new ReprojectionErrorWithConcentricConstrain(obs_kpt, obs_lms, intrinsic)));
     }

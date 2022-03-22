@@ -39,7 +39,7 @@ def copyAndRenameCamData(raw_cam_folder, img_list, out_cam_folder):
         shutil.copyfile(src_img_path, dst_img_path)
 
 def copyAndRenameImuData(raw_imu_file, out_imu_file):
-    # the raw imu tms unit is ms
+    # the raw imu tms unit is us
     imu_data = mv3dhelper.readImuData(raw_imu_file)
 
     # reorder imu data
@@ -49,8 +49,8 @@ def copyAndRenameImuData(raw_imu_file, out_imu_file):
         imu_timestamp = float(data[0])
         # if imu_timestamp >= img_start_timestamps:
         # the raw imu tms unit is us, then we cvt it into ns
-        new_imu_tuple = (int(imu_timestamp*1000), data[4], data[5],
-                         data[6], data[1], data[2], data[3])
+        new_imu_tuple = (int(imu_timestamp*1000), data[1], data[2],
+                         data[3], data[4], data[5], data[6])
         new_imu_datas.append(new_imu_tuple)
 
     # write imu.csv

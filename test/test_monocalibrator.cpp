@@ -113,6 +113,7 @@ int main(int argc, char **argv)
     const auto calib_time = std::chrono::duration_cast<std::chrono::duration<double>>(tp_2 - tp_1).count();
     LOG(INFO) << " calibration time is " << calib_time << " s";
 #ifdef VISUALIZE_TRAJECTORY
+    std::vector<Eigen::Matrix4d> v_visual_frames = mono_calibrator.validCameraPoses();
     Viewer viewer(v_visual_frames);
     std::vector<Eigen::Vector3d> v_map_points = mono_calibrator.objectPoints();
     viewer.setCurrentMapPoints(v_map_points);

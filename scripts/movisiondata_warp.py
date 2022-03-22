@@ -31,8 +31,12 @@ def split4FisheyeImages(raw_concat_img_folder, new_cam0_folder, new_cam1_folder,
     cam1_tms_fd = open(cam1_tms_fname, 'w')
     cam2_tms_fd = open(cam2_tms_fname, 'w')
     cam3_tms_fd = open(cam3_tms_fname, 'w')
-    for img_name in raw_imgs:
+    for img_idx in range(0,len(raw_imgs), 6):
+        img_name = raw_imgs[img_idx]
         raw_concat_img_path = os.path.join(raw_concat_img_folder, img_name)
+        if not os.path.exists(raw_concat_img_path):
+            print("Warning {} does not exist".format(raw_concat_img_path))
+            continue
         raw_concat_img = cv2.imread(raw_concat_img_path)
         if b_rotate:
             raw_concat_img = cv2.rotate(raw_concat_img, cv2.ROTATE_90_CLOCKWISE)
@@ -42,10 +46,22 @@ def split4FisheyeImages(raw_concat_img_folder, new_cam0_folder, new_cam1_folder,
         height, width, channel = raw_concat_img.shape
         if channel == 3: 
             raw_concat_img = cv2.cvtColor(raw_concat_img, cv2.COLOR_BGR2GRAY)
-        cam0_img = raw_concat_img[:, 0:width//4]
-        cam1_img = raw_concat_img[:, width//4: width//2]
-        cam2_img = raw_concat_img[:, width//2: width//4*3]
-        cam3_img = raw_concat_img[:, width//4*3:width]
+        if b_rotate:
+            cam0_img = raw_concat_img[:, 0:width//4]
+            cam1_img = raw_concat_img[:, width//4: width//2]
+            cam2_img = raw_concat_img[:, width//2: width//4*3]
+            cam3_img = raw_concat_img[:, width//4*3:width]
+        else:
+            cam2_img = raw_concat_img[0:height//4:, :]
+            cam3_img = raw_concat_img[height//4: height//2, :]
+            cam0_img = raw_concat_img[height//2: height//4*3, :]
+            cam1_img = raw_concat_img[height//4*3:height, :]
+
+        # histogram equalization
+        cam0_img = cv2.equalizeHist(cam0_img)
+        cam1_img = cv2.equalizeHist(cam1_img)
+        cam2_img = cv2.equalizeHist(cam2_img)
+        cam3_img = cv2.equalizeHist(cam3_img)
 
         # cvt timestamp from us into ns
         tms = img_name.split(img_file_ext)[0]
@@ -81,21 +97,21 @@ def convImuData(raw_imu_filepath, conv_imu_filepath):
     # raw file format
     # timestmap(ns) gyr_x gyr_y gyr_z(rad/s) acc_x acc_y acc_z(m/s^2)
     # target file format
-    # timestamp(ns) gyro_x  gyro_y  gyro_z(rad/s) acc_x  acc_y  acc_z(m/s^2)  
+    # timestamp(us) gyro_x  gyro_y  gyro_z(rad/s) acc_x  acc_y  acc_z(m/s^2)  
     with open(raw_imu_filepath, 'r') as raw_file:
         all_lines = raw_file.readlines()
         for line in all_lines:
             raw_data = re.split(',| |\n', line)
             if raw_data[0].isalpha():
                 continue
-            tms = raw_data[0]
+            tms = float(raw_data[0])/ 1000
             gx = raw_data[1]
             gy = raw_data[2]
             gz = raw_data[3]
             ax = raw_data[4]
             ay = raw_data[5]
             az = raw_data[6]
-            new_imu_data.append([tms, gx, gy, gz, ax, ay, az])
+            new_imu_data.append([str(int(tms)), gx, gy, gz, ax, ay, az])
 
     with open(conv_imu_filepath, 'w') as new_file:
         for data in new_imu_data:

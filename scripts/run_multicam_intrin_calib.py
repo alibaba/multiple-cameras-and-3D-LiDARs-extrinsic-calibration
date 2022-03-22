@@ -32,8 +32,8 @@ def eval_mono_camera_intrin(eval_exe, cam_res_list, cam_res_filepath, cam_analy_
     cam_type = 'mono'
     # resfile_num = 3
     # cmds = [eval_exe, cam_type, resfile_num, cam_res_list[0], cam_res_list[1], cam_res_list[2], cam_analy_filepath, cam_res_filepath]
-    resfile_num = 2
-    cmds = [eval_exe, cam_type, resfile_num, cam_res_list[0], cam_res_list[1], cam_analy_filepath, cam_res_filepath]
+    resfile_num = 1
+    cmds = [eval_exe, cam_type, resfile_num, cam_res_list[0], cam_analy_filepath, cam_res_filepath]
     print(cmds)
     if zrpc.map([cmds])[1] == 0:
         exit(-1)
@@ -47,12 +47,12 @@ if __name__ == "__main__":
                         help="the workspace folder")
     parser.add_argument('dataset_folder', type=str, default="",
                         help='the dataset root folder, data specification: https://yuque.antfin-inc.com/aone857851/udonh7/bmazpr')
-    parser.add_argument('cam_num', type=str, default='mono',
-                        help="the camera number: 1 or 2 or 4")
+    parser.add_argument('cam_num', type=str, default='1',
+                        help="the camera number: [1,2,4,5]")
     parser.add_argument('output_folder', type=str, default='',
                         help='the folder of output files')
     parser.add_argument('--target_type', type=str,
-                        default='checkerboard', help='target type')
+                        default='apriltag', help='target type')
     parser.add_argument('--extension', type=str, default='.jpg',
                         help='the extension of image under dataset folder')
     parser.add_argument('--show_result', type=bool, default=False,
@@ -65,6 +65,8 @@ if __name__ == "__main__":
                         help='image prefix under cam2 folder')
     parser.add_argument('--cam3_idx', type=int, default=3,
                         help='image prefix under cam3 folder')
+    parser.add_argument('--cam4_idx', type=int, default=4,
+                        help='image prefix under cam4 folder')
 
     args = parser.parse_args()
     ws_folder = args.ws_folder
@@ -80,6 +82,7 @@ if __name__ == "__main__":
     cam1_idx = args.cam1_idx
     cam2_idx = args.cam2_idx
     cam3_idx = args.cam3_idx
+    cam4_idx = args.cam4_idx
 
     # target filepath
     if target_type not in ['checkerboard', 'apriltag', 'cctag']:
@@ -96,6 +99,7 @@ if __name__ == "__main__":
     cam1_datafolder_list = []
     cam2_datafolder_list = []
     cam3_datafolder_list = []
+    cam4_datafolder_list = []
 
     if cam_num == '1':
         for data_folder in data_folders_list:
@@ -113,6 +117,14 @@ if __name__ == "__main__":
             cam1_datafolder_list.append(os.path.join(cams_folder, 'cam1'))
             cam2_datafolder_list.append(os.path.join(cams_folder, 'cam2'))
             cam3_datafolder_list.append(os.path.join(cams_folder, 'cam3'))
+    elif cam_num == '5':
+        for data_folder in data_folders_list:
+            cams_folder = os.path.join(data_folder, 'cams')
+            cam0_datafolder_list.append(os.path.join(cams_folder, 'cam0'))
+            cam1_datafolder_list.append(os.path.join(cams_folder, 'cam1'))
+            cam2_datafolder_list.append(os.path.join(cams_folder, 'cam2'))
+            cam3_datafolder_list.append(os.path.join(cams_folder, 'cam3'))
+            cam4_datafolder_list.append(os.path.join(cams_folder, 'cam4'))
 
     mv3dhelper.create_folder_if_not_exists(output_folder)
 
@@ -128,6 +140,7 @@ if __name__ == "__main__":
     cam1_res_list = []
     cam2_res_list = []
     cam3_res_list = []
+    cam4_res_list = []
     for data_path in cam0_datafolder_list:
         raw_datapath = data_path
         res_path = os.path.join(data_path, 'kalibr')
@@ -152,6 +165,12 @@ if __name__ == "__main__":
         calib_mono_camera_intrin(intrin_calb_exe, ws_folder,raw_datapath, res_path, target_type)
         res_filepath = os.path.join(res_path, 'result/mono.yaml')
         cam3_res_list.append(res_filepath)
+    for data_path in cam4_datafolder_list:
+        raw_datapath = data_path
+        res_path = os.path.join(data_path, 'kalibr')
+        calib_mono_camera_intrin(intrin_calb_exe, ws_folder,raw_datapath, res_path, target_type)
+        res_filepath = os.path.join(res_path, 'result/mono.yaml')
+        cam4_res_list.append(res_filepath)
 
     timing_info.append(('Calibrate mono camera intrinsic', time.time() - time_start))
     time_start = time.time()
@@ -181,6 +200,12 @@ if __name__ == "__main__":
     eval_mono_camera_intrin(intrin_eval_exe, cam3_res_list, cam3_res_filepath, cam3_analy_filepath)
     # cp data0/cams/cam3/kalibr/result/mono.yaml output_folder/cam3_chain.yaml
     shutil.copy2(cam3_res_list[0], os.path.join(output_folder, 'cam3_chain.yaml'))
+
+    cam4_res_filepath = os.path.join(output_folder, 'cam4.yml')
+    cam4_analy_filepath = os.path.join(output_folder, 'cam4_analysis.txt')
+    eval_mono_camera_intrin(intrin_eval_exe, cam4_res_list, cam4_res_filepath, cam4_analy_filepath)
+    # cp data0/cams/cam4/kalibr/result/mono.yaml output_folder/cam4_chain.yaml
+    shutil.copy2(cam4_res_list[0], os.path.join(output_folder, 'cam4_chain.yaml'))
 
     timing_info.append(('Evaluate intrinsic calirbation result', time.time() - time_start))
     time_start = time.time()

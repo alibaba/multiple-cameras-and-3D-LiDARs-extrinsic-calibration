@@ -85,7 +85,7 @@ def convImuData(raw_imu_filepath, conv_imu_filepath):
     # raw file format
     # timestmap(us) acc_x acc_y acc_z(G) gyr_x gyr_y gyr_z(rad/s) 
     # target file format
-    # timestamp(ns) gyro_x  gyro_y  gyro_z(rad/s) acc_x  acc_y  acc_z(m/s^2)  
+    # timestamp(us) gyro_x  gyro_y  gyro_z(rad/s) acc_x  acc_y  acc_z(m/s^2)  
     with open(raw_imu_filepath, 'r') as raw_file:
         all_lines = raw_file.readlines()
         for line in all_lines:
