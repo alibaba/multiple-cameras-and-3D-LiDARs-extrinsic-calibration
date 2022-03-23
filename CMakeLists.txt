@@ -9,7 +9,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -g -Wno-unknown-pragmas -Wall ")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -Wno-unused-but-set-variable")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3 -Wno-unknown-pragmas -Wall")
 
-option(WITH_VISUALIZATION "Use pangolin to visualize odometry" ON)
+option(WITH_VISUALIZATION "Use pangolin to visualize odometry" OFF)
 option(BUILD_LIDAR_CALIBRATOR "Build Lidar calibration programs or not" OFF)
 
 # opencv
@@ -57,8 +57,8 @@ find_package(yaml-cpp REQUIRED)
 include_directories(${YAML_CPP_INCLUDE_DIR})
 
 #find Open3D
-# find_package(Open3D REQUIRED)
-# include_directories(${Open3D_INCLUDE_DIRS})
+find_package(Open3D REQUIRED)
+include_directories(${Open3D_INCLUDE_DIRS})
 
 # find glog
 # find_package(glog REQUIRED)
@@ -68,8 +68,8 @@ include_directories(
     inc 
     "${CMAKE_CURRENT_SOURCE_DIR}/")
 
-# link_libraries(${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} ${CERES_LIBRARIES})
-link_libraries(${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${CERES_LIBRARIES})
+link_libraries(${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} ${CERES_LIBRARIES})
+# link_libraries(${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${CERES_LIBRARIES})
 
 # make filesystem and io operation as libraries
 add_library(common SHARED
@@ -118,13 +118,13 @@ message("--Compilation of intrinsic evaluator")
 add_executable(test_eval_kalibr ./test/test_eval_kalibr.cpp)
 target_link_libraries(test_eval_kalibr ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog common ) 
 
-# message("--Compilation of lidar2lidar calibration")
-# add_executable(test_lidar2lidar_calib ./test/test_lidar2lidar_calibration.cpp)
-# target_link_libraries(test_lidar2lidar_calib ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common)
+message("--Compilation of lidar2lidar calibration")
+add_executable(test_lidar2lidar_calib ./test/test_lidar2lidar_calibration.cpp)
+target_link_libraries(test_lidar2lidar_calib ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common)
 
-# message("--Compilation of lidar2cam calibration")
-# add_executable(test_lidar2cam_calibration ./test/test_lidar2cam_calibration.cpp)
-# target_link_libraries(test_lidar2cam_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common)
+message("--Compilation of lidar2cam calibration")
+add_executable(test_lidar2cam_calibration ./test/test_lidar2cam_calibration.cpp)
+target_link_libraries(test_lidar2cam_calibration ${OpenCV_LIBS}  ${YAML_CPP_LIBRARIES} ${Boost_LIBRARIES} glog ${Open3D_LIBRARIES} common)
 
 message("--Compilation of extrinsic evaluation")
 add_executable(test_eval_extrinsics ./test/test_eval_extrinsics)

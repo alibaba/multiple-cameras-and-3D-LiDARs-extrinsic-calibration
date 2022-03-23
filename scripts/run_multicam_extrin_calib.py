@@ -123,26 +123,6 @@ if __name__ == "__main__":
             shutil.rmtree(f)
 
     focal_scale = 1.0
-    # if cam_num == '1':
-    #     cmds = [img_undist_exe, raw_cam_folder_list[cam0_idx],
-    #             cam_intrin_filelist[cam0_idx], undist_cam_folder_list[cam0_idx], focal_scale]
-    #     print(cmds)
-    #     if zrpc.map([cmds])[1] == 0:
-    #         exit(-1)
-    # elif cam_num == '2':
-    #     # undistort camera0
-    #     cmds = [img_undist_exe, raw_cam_folder_list[cam0_idx],
-    #             cam_intrin_filelist[cam0_idx], undist_cam_folder_list[cam0_idx], focal_scale]
-    #     print(cmds)
-    #     if zrpc.map([cmds])[1] == 0:
-    #         exit(-1)
-    #     # undistort camera1
-    #     cmds = [img_undist_exe, raw_cam_folder_list[cam1_idx],
-    #             cam_intrin_filelist[cam1_idx], undist_cam_folder_list[cam1_idx], focal_scale]
-    #     print(cmds)
-    #     if zrpc.map([cmds])[1] == 0:
-    #         exit(-1)
-    # elif cam_num == '4':
     for idx in range(0, int(cam_num)):
         raw_cam_folder = raw_cam_folder_list[idx]
         undist_cam_folder = undist_cam_folder_list[idx]
