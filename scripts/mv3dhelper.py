@@ -230,7 +230,7 @@ def sort_rename_images(input_folder, raw_prefix, out_prefix, extension):
     return sorted_img_names
 
 
-def readImageTms(raw_cam_tms_filepath, device='BACKPACK'):
+def readImageTms(raw_cam_tms_filepath):
     """
     :param raw_cam_tms_filepath: image timestamp file
     :return: the image timestamp map{img_idx:timestamp}.
@@ -239,17 +239,22 @@ def readImageTms(raw_cam_tms_filepath, device='BACKPACK'):
     with open(raw_cam_tms_filepath, 'r') as img_ts_fd:
         for line in img_ts_fd:
             if(len(line) > 0):
-                if device == 'BACKPACK':
-                    # data: timestamp cam_idx img_idx
-                    img_ts = line.split()
-                    # src time unit: s, new time unit: ns
-                    img_timestamps[img_ts[2]] = str(
-                        int(float(img_ts[0]) * 1000000))+'000'
-                elif device == 'SIM' or device == 'XVISIO':
-                    # data: timestamp cam_idx img_idx
-                    img_ts = line.split()
-                    # src time unit: ns, new time unit: ns
-                    img_timestamps[img_ts[2]] = str(int(float(img_ts[0])))
+                # if device == 'BACKPACK':
+                #     # data: timestamp cam_idx img_idx
+                #     img_ts = line.split()
+                #     # src time unit: s, new time unit: ns
+                #     img_timestamps[img_ts[2]] = str(
+                #         int(float(img_ts[0]) * 1000000))+'000'
+                # elif device == 'SIM' or device == 'XVISIO':
+                #     # data: timestamp cam_idx img_idx
+                #     img_ts = line.split()
+                #     # src time unit: ns, new time unit: ns
+                #     img_timestamps[img_ts[2]] = str(int(float(img_ts[0])))
+
+                # data: timestamp cam_idx img_idx
+                img_ts = line.split()
+                # src time unit: ns, new time unit: ns
+                img_timestamps[img_ts[2]] = str(int(float(img_ts[0])))
 
     return img_timestamps
 

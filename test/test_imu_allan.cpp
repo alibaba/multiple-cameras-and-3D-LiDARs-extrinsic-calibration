@@ -48,7 +48,7 @@ bool loadRawImuData(const std::string &imu_filepath, imu::AllanGyr *gyr_x_ptr, i
         // std::cout << "timestamp: " << std::setprecision(9) << timestamp << ", " << acc_x << ", " << acc_y << ", " << acc_z << ", " << gyro_x << ", " << gyro_y << ", " << gyro_z << "\n";
         long double time = timestamp / k_tms_unit;
         // double time = std::round(time_tmp * 1000) / 1000.0;
-        std::cout << "timestamp : " << std::setprecision(9) << time << "\n";
+        // std::cout << "timestamp : " << std::setprecision(9) << time << "\n";
         gyr_x_ptr->pushRadPerSec(gyro_x, time);
         gyr_y_ptr->pushRadPerSec(gyro_y, time);
         gyr_z_ptr->pushRadPerSec(gyro_z, time);

@@ -71,11 +71,11 @@ if __name__ == "__main__":
         imu_name = 'xsens'
         if os.path.exists(raw_imu_filepath):
             imu_intrin_file = calibImuIntrin(calib_imu_intrin_exe, raw_imu_filepath, imu_name, max_time_min, max_cluster, res_folder)
-        imu_intrin_list.append(imu_intrin_file)
+            imu_intrin_list.append(imu_intrin_file)
         
-        round_cnt += 1
-        timing_info.append(('Round {} calibration of imu intrinsic'.format(round_cnt), time.time() - time_start))
-        time_start = time.time()
+            round_cnt += 1
+            timing_info.append(('Round {} calibration of imu intrinsic'.format(round_cnt), time.time() - time_start))
+            time_start = time.time()
 
 
     assert(len(imu_intrin_list))

@@ -27,6 +27,11 @@ def splitStereoImages(raw_stereo_folder, new_stereo_folder, b_rotate_stereo):
     l_tms_fd = open(left_tms_name, 'w')
     r_tms_fd = open(right_tms_name, 'w')
     for img_name in raw_imgs:
+        tms = img_name.split('.jpg')[0] + '000'
+        # skip images whose timestamp is invalid
+        if int(tms) <= 0:
+            continue
+
         raw_l_img_path = os.path.join(raw_left_cam_folder, img_name)
         raw_r_img_path = os.path.join(raw_right_cam_folder, img_name)
         l_img = cv2.imread(raw_l_img_path)
@@ -39,7 +44,6 @@ def splitStereoImages(raw_stereo_folder, new_stereo_folder, b_rotate_stereo):
         # cv2.waitKey(0)
 
         # cvt timestamp from us into ns
-        tms = img_name.split('.jpg')[0] + '000'
         new_img_name = tms + '.jpg'
         left_img_path = os.path.join(new_left_cam_folder, '0_' + new_img_name)
         right_img_path = os.path.join(new_right_cam_folder, '1_' + new_img_name)
@@ -91,9 +95,12 @@ def convImuData(raw_imu_filepath, conv_imu_filepath):
         for line in all_lines:
             raw_data = line.split()
             tms = raw_data[0]
-            ax = str(float(raw_data[1]) * 9.81)
-            ay = str(float(raw_data[2]) * 9.81)
-            az = str(float(raw_data[3]) * 9.81)
+            # ax = str(float(raw_data[1]) * 9.81)
+            # ay = str(float(raw_data[2]) * 9.81)
+            # az = str(float(raw_data[3]) * 9.81)
+            ax = raw_data[1]
+            ay = raw_data[2]
+            az = raw_data[3]
             gx = raw_data[4]
             gy = raw_data[5]
             gz = raw_data[6]

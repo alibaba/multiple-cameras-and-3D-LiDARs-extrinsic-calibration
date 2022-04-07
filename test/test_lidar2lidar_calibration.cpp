@@ -26,13 +26,24 @@ struct RegistrationResult{
 void createMultiLidarExtFile(const std::string& filename)
 {
     // new backpack structural value
+    // Eigen::Matrix4d T_l0_l1_gt = Eigen::Matrix4d::Identity();
+    // Eigen::AngleAxisd l0_l1_vec1(-30 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
+    // Eigen::AngleAxisd l0_l1_vec2(-73.5 * M_PI / 180.0, Eigen::Vector3d(0, 1, 0));
+    // Eigen::Matrix3d l0_l1_vec = l0_l1_vec1.matrix() * l0_l1_vec2.matrix();
+    // Eigen::Vector3d t_l0_l1(-0.31405, 0, -0.39803);
+    // T_l0_l1_gt.block<3, 3>(0, 0) = l0_l1_vec;
+    // T_l0_l1_gt.block<3, 1>(0, 3) = l0_l1_vec1.matrix() * t_l0_l1;
+    // std::cout << "T_l0_l1_gt:\n" << T_l0_l1_gt << "\n";
+
+    // common::saveExtFileOpencv(filename, T_l0_l1_gt);   
+
+    // XR backpack structural value
     Eigen::Matrix4d T_l0_l1_gt = Eigen::Matrix4d::Identity();
-    Eigen::AngleAxisd l0_l1_vec1(-30 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
-    Eigen::AngleAxisd l0_l1_vec2(-73.5 * M_PI / 180.0, Eigen::Vector3d(0, 1, 0));
-    Eigen::Matrix3d l0_l1_vec = l0_l1_vec1.matrix() * l0_l1_vec2.matrix();
-    Eigen::Vector3d t_l0_l1(-0.31405, 0, -0.39803);
+    Eigen::AngleAxisd l0_l1_vec1(-75 * M_PI / 180.0, Eigen::Vector3d(0, 1, 0));
+    Eigen::Matrix3d l0_l1_vec = l0_l1_vec1.matrix();
+    Eigen::Vector3d t_l0_l1(-0.17128, 0, -0.10688);
     T_l0_l1_gt.block<3, 3>(0, 0) = l0_l1_vec;
-    T_l0_l1_gt.block<3, 1>(0, 3) = l0_l1_vec1.matrix() * t_l0_l1;
+    T_l0_l1_gt.block<3, 1>(0, 3) = t_l0_l1;
     std::cout << "T_l0_l1_gt:\n" << T_l0_l1_gt << "\n";
 
     common::saveExtFileOpencv(filename, T_l0_l1_gt);   

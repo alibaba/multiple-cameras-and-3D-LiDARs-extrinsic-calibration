@@ -31,35 +31,63 @@ void createLidarCamExtFile(const std::string& filepath, int lidar_id)
 
     std::string init_T_l0_c0_filepath = common::concatenateFolderAndFileName(folder, "init_lidar0_to_camera0.yml");
     // new backpack structural value
-    Eigen::Matrix4d T_l0_c0_gt = Eigen::Matrix4d::Identity();
-    Eigen::AngleAxisd l0_c0_vec1(-30 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
-    Eigen::AngleAxisd l0_c0_vec2(90 * M_PI / 180.0, Eigen::Vector3d(1, 0, 0));
-    Eigen::AngleAxisd l0_c0_vec3( M_PI, Eigen::Vector3d(0, 0, 1));
-    Eigen::Matrix3d l0_c0_vec = l0_c0_vec1.matrix() * l0_c0_vec2.matrix() * l0_c0_vec3.matrix();
-    Eigen::Vector3d t_l0_c0(0.0, -0.05657, -0.05931);
-    T_l0_c0_gt.block<3, 3>(0, 0) = l0_c0_vec;
-    T_l0_c0_gt.block<3, 1>(0, 3) = l0_c0_vec1.matrix() * t_l0_c0;
-    // std::cout << "T_l0_c0_gt:\n" << T_l0_c0_gt << "\n";
-    common::saveExtFileOpencv(init_T_l0_c0_filepath, T_l0_c0_gt);  
+    // Eigen::Matrix4d T_l0_c0_gt = Eigen::Matrix4d::Identity();
+    // Eigen::AngleAxisd l0_c0_vec1(-30 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
+    // Eigen::AngleAxisd l0_c0_vec2(90 * M_PI / 180.0, Eigen::Vector3d(1, 0, 0));
+    // Eigen::AngleAxisd l0_c0_vec3( M_PI, Eigen::Vector3d(0, 0, 1));
+    // Eigen::Matrix3d l0_c0_vec = l0_c0_vec1.matrix() * l0_c0_vec2.matrix() * l0_c0_vec3.matrix();
+    // Eigen::Vector3d t_l0_c0(0.0, -0.05657, -0.05931);
+    // T_l0_c0_gt.block<3, 3>(0, 0) = l0_c0_vec;
+    // T_l0_c0_gt.block<3, 1>(0, 3) = l0_c0_vec1.matrix() * t_l0_c0;
+    // // std::cout << "T_l0_c0_gt:\n" << T_l0_c0_gt << "\n";
+    // common::saveExtFileOpencv(init_T_l0_c0_filepath, T_l0_c0_gt);  
 
-    Eigen::Matrix4d T_imu_l0_gt = Eigen::Matrix4d::Identity();
-    Eigen::AngleAxisd imu_l0_vec1(150 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
-    Eigen::AngleAxisd imu_l0_vec2(30 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
-    Eigen::Matrix3d imu_l0_vec = imu_l0_vec1.matrix() * imu_l0_vec2.matrix();
-    Eigen::Vector3d t_imu_l0(0.00044, 0.03407, 0.10148);
-    T_imu_l0_gt.block<3, 3>(0, 0) = imu_l0_vec;
-    T_imu_l0_gt.block<3, 1>(0, 3) = imu_l0_vec1.matrix() * t_imu_l0;
-    std::cout << "T_imu_l0_gt:\n" << T_imu_l0_gt << "\n";
+    // Eigen::Matrix4d T_imu_l0_gt = Eigen::Matrix4d::Identity();
+    // Eigen::AngleAxisd imu_l0_vec1(150 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
+    // Eigen::AngleAxisd imu_l0_vec2(30 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
+    // Eigen::Matrix3d imu_l0_vec = imu_l0_vec1.matrix() * imu_l0_vec2.matrix();
+    // Eigen::Vector3d t_imu_l0(0.00044, 0.03407, 0.10148);
+    // T_imu_l0_gt.block<3, 3>(0, 0) = imu_l0_vec;
+    // T_imu_l0_gt.block<3, 1>(0, 3) = imu_l0_vec1.matrix() * t_imu_l0;
+    // std::cout << "T_imu_l0_gt:\n" << T_imu_l0_gt << "\n";
+
+    // Eigen::Matrix4d T_l0_l1_gt = Eigen::Matrix4d::Identity();
+    // Eigen::AngleAxisd l0_l1_vec1(-30 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
+    // Eigen::AngleAxisd l0_l1_vec2(-73.5 * M_PI / 180.0, Eigen::Vector3d(0, 1, 0));
+    // Eigen::Matrix3d l0_l1_vec = l0_l1_vec1.matrix() * l0_l1_vec2.matrix();
+    // Eigen::Vector3d t_l0_l1(-0.31405, 0, -0.39803);
+    // T_l0_l1_gt.block<3, 3>(0, 0) = l0_l1_vec;
+    // T_l0_l1_gt.block<3, 1>(0, 3) = l0_l1_vec1.matrix() * t_l0_l1;
+    // // calc T_l1_c0
+    // Eigen::Matrix4d T_l1_c0_gt = T_l0_l1_gt.inverse() * T_l0_c0_gt;
+    // common::saveExtFileOpencv(filepath, T_l1_c0_gt);
+
+
+    // XR backpack structural value
+    Eigen::Matrix4d T_l0_c0_gt = Eigen::Matrix4d::Identity();
+    Eigen::AngleAxisd l0_c0_vec1(-90 * M_PI / 180.0, Eigen::Vector3d(0, 1, 0));
+    Eigen::AngleAxisd l0_c0_vec2(M_PI, Eigen::Vector3d(0, 0, 1));
+    Eigen::Matrix3d l0_c0_vec = l0_c0_vec1.matrix() * l0_c0_vec2.matrix();
+    Eigen::Vector3d t_l0_c0(-0.0635, 0, 0.1569);
+    T_l0_c0_gt.block<3, 3>(0, 0) = l0_c0_vec;
+    T_l0_c0_gt.block<3, 1>(0, 3) = t_l0_c0;
+    LOG(INFO) << "T_l0_c0_gt:\n" << T_l0_c0_gt << "\n";
+    common::saveExtFileOpencv(init_T_l0_c0_filepath, T_l0_c0_gt); 
 
     Eigen::Matrix4d T_l0_l1_gt = Eigen::Matrix4d::Identity();
-    Eigen::AngleAxisd l0_l1_vec1(-30 * M_PI / 180.0, Eigen::Vector3d(0, 0, 1));
-    Eigen::AngleAxisd l0_l1_vec2(-73.5 * M_PI / 180.0, Eigen::Vector3d(0, 1, 0));
-    Eigen::Matrix3d l0_l1_vec = l0_l1_vec1.matrix() * l0_l1_vec2.matrix();
-    Eigen::Vector3d t_l0_l1(-0.31405, 0, -0.39803);
+    Eigen::AngleAxisd l0_l1_vec1(-75 * M_PI / 180.0, Eigen::Vector3d(0, 1, 0));
+    Eigen::Matrix3d l0_l1_vec = l0_l1_vec1.matrix();
+    Eigen::Vector3d t_l0_l1(-0.17128, 0, -0.10688);
     T_l0_l1_gt.block<3, 3>(0, 0) = l0_l1_vec;
-    T_l0_l1_gt.block<3, 1>(0, 3) = l0_l1_vec1.matrix() * t_l0_l1;
+    T_l0_l1_gt.block<3, 1>(0, 3) = t_l0_l1;
+    T_l0_l1_gt <<    0.258052, -0.00111236,    -0.96613,   -0.152558,
+6.50845e-05,    0.999999, -0.00113397,  0.00927493,
+   0.966131, 0.000229743,    0.258052,   -0.110728,
+          0,           0,           0,           1;
+    LOG(INFO) << "T_l0_l1_gt:\n" << T_l0_l1_gt << "\n";
     // calc T_l1_c0
     Eigen::Matrix4d T_l1_c0_gt = T_l0_l1_gt.inverse() * T_l0_c0_gt;
+    LOG(INFO) << "T_l1_c0_gt:\n" << T_l1_c0_gt << "\n";
     common::saveExtFileOpencv(filepath, T_l1_c0_gt);
 }
 

@@ -26,7 +26,7 @@ def copyAndRenameCamData(raw_cam_folder, img_list, out_cam_folder):
         exit(-1)
 
     # the raw image tms unit is s, then we cvt it into ns
-    img_tms = mv3dhelper.readImageTms(raw_cam_tms_filepath, device='SIM')
+    img_tms = mv3dhelper.readImageTms(raw_cam_tms_filepath)
 
     # copy images to out_cam_folder
     delim_pattern = r'\_|\.'
@@ -46,7 +46,7 @@ def copyAndRenameImuData(raw_imu_file, out_imu_file):
     new_imu_datas = []
     for data in imu_data:
         # timestamp: ms
-        imu_timestamp = float(data[0])
+        imu_timestamp = int(data[0])
         # if imu_timestamp >= img_start_timestamps:
         # the raw imu tms unit is us, then we cvt it into ns
         new_imu_tuple = (int(imu_timestamp*1000), data[1], data[2],
@@ -249,7 +249,7 @@ if __name__ == "__main__":
     T_cam_imu_list = []
     round_cnt = 0
     for folder in raw_data_folder_list:
-        data_folder = os.path.join(folder, 'cam-imu')
+        data_folder = os.path.join(folder, 'cam_imu')
         res_folder = os.path.join(data_folder, 'kalibr')
         T_cam_imu_file = calibCamImuExt(data_folder, res_folder, target_filepath, imu_yaml_file, cam_chain_yaml_file, img_extension, b_show_extract, cam_type, cam0_idx, cam1_idx)
         T_ext = readCamImuExtFileKalir(T_cam_imu_file)
@@ -260,9 +260,9 @@ if __name__ == "__main__":
         time_start = time.time()
 
 
-    # T_avg = evalExtrinsics(T_cam_imu_list)
-    # avg_res_filepath = os.path.join(output_folder, 'camera'+ str(cam0_idx)+'_to_imu.yaml')
-    # mv3dhelper.saveExtFileOpencv(avg_res_filepath, T_avg)
+    T_avg = evalExtrinsics(T_cam_imu_list)
+    avg_res_filepath = os.path.join(output_folder, 'camera'+ str(cam0_idx)+'_to_imu.yaml')
+    mv3dhelper.saveExtFileOpencv(avg_res_filepath, T_avg)
 
     print('------------------------------')
     for info in timing_info:

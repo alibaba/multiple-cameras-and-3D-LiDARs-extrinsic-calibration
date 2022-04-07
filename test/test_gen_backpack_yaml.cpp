@@ -684,7 +684,8 @@ bool readOpencvOutputFile(const std::string& cam0_intrinsic_fn,
 }
 
 bool writeYAMLOutputFile(const std::string& file_name, const MonoCamParam& cam0, const MonoCamParam& cam1, 
-                         const MonoCamParam& cam2, const MonoCamParam& cam3, const MonoIMUParam& mono_imu,
+                         const MonoCamParam& cam2, const MonoCamParam& cam3, const MonoCamParam& cam4,
+                         const MonoIMUParam& mono_imu,
                          const Eigen::Matrix4d& T_lidar0_lidar1,
                          const Eigen::Matrix4d& T_lidar1_cam0, int device_id) {
     if (file_name.empty()) {
@@ -705,6 +706,7 @@ bool writeYAMLOutputFile(const std::string& file_name, const MonoCamParam& cam0,
     YAML::Node camera1_node;
     YAML::Node camera2_node;
     YAML::Node camera3_node;
+    YAML::Node camera4_node;
     YAML::Node imu_node;
 
     // serial nunmber
@@ -712,7 +714,7 @@ bool writeYAMLOutputFile(const std::string& file_name, const MonoCamParam& cam0,
 
     // sensor bucket
     std::vector<std::vector<std::string> > v_sensor_buckets = {
-    {"camera_0", "pinhole"}, {"camera_1", "pinhole"}, {"camera_2", "pinhole"}, {"camera_3", "pinhole"},
+    {"camera_0", "pinhole"}, {"camera_1", "pinhole"}, {"camera_2", "pinhole"}, {"camera_3", "pinhole"},{"camera_4", "pinhole"},
     {"horizon_lidar", "multi"},  {"vertical_lidar", "multi"}, {"imu_config"}};
 
     for (size_t i = 0; i < v_sensor_buckets.size(); ++i) {
@@ -730,11 +732,13 @@ bool writeYAMLOutputFile(const std::string& file_name, const MonoCamParam& cam0,
     Eigen::Matrix4d T_cam0_cam1 = cam1.T_ref_cam_;
     Eigen::Matrix4d T_cam0_cam2 = cam2.T_ref_cam_;
     Eigen::Matrix4d T_cam0_cam3 = cam3.T_ref_cam_;
+    Eigen::Matrix4d T_cam0_cam4 = cam4.T_ref_cam_;
     Eigen::Matrix4d T_cam0_base = mono_imu.T_cam0_imu;
     Eigen::Matrix4d T_base_cam0 = T_cam0_base.inverse();
     Eigen::Matrix4d T_base_cam1 = T_base_cam0 * T_cam0_cam1;
     Eigen::Matrix4d T_base_cam2 = T_base_cam0 * T_cam0_cam2;
     Eigen::Matrix4d T_base_cam3 = T_base_cam0 * T_cam0_cam3;
+    Eigen::Matrix4d T_base_cam4 = T_base_cam0 * T_cam0_cam4;
     Eigen::Matrix4d T_base_l1 = T_base_cam0 * T_lidar1_cam0.inverse();
     Eigen::Matrix4d T_base_l0 = T_base_l1 * T_lidar0_lidar1.inverse();
     Eigen::Matrix4d T_base_imu = Eigen::Matrix4d::Identity();
@@ -815,6 +819,25 @@ bool writeYAMLOutputFile(const std::string& file_name, const MonoCamParam& cam0,
             camera3_node["extrinsics"]["rows"] = T_base_cam3.rows();
             camera3_node["extrinsics"]["data"] = T_base_cam3;
             camera3_node["extrinsics"]["data"].SetStyle(YAML::EmitterStyle::Flow);
+        }
+        {
+            camera4_node["type"] = cam4.camera_type;
+            camera4_node["distort_type"] = cam4.distortion_type;
+            camera4_node["image_height"] = cam4.img_height_;
+            camera4_node["image_width"] = cam4.img_width_;
+            camera4_node["intrinsics"]["cols"] = cam4.intrinsic_.cols();
+            camera4_node["intrinsics"]["rows"] = cam4.intrinsic_.rows();
+            camera4_node["intrinsics"]["data"] = cam4.intrinsic_;
+            camera4_node["intrinsics"]["data"].SetStyle(YAML::EmitterStyle::Flow);
+
+            camera4_node["distort_coefficient"]["cols"] = cam4.distortions_.cols();
+            camera4_node["distort_coefficient"]["rows"] = cam4.distortions_.rows();
+            camera4_node["distort_coefficient"]["data"] = cam4.distortions_;
+            camera4_node["distort_coefficient"]["data"].SetStyle(YAML::EmitterStyle::Flow);
+            camera4_node["extrinsics"]["cols"] = T_base_cam4.cols();
+            camera4_node["extrinsics"]["rows"] = T_base_cam4.rows();
+            camera4_node["extrinsics"]["data"] = T_base_cam4;
+            camera4_node["extrinsics"]["data"].SetStyle(YAML::EmitterStyle::Flow);
         }
     }
 
@@ -1021,7 +1044,7 @@ bool loadIMUIntrinFileKalibr(const std::string &imu_intrin_filepath, MonoIMUPara
 
 int main(int argc, char* argv[]) {
     if (argc < 4) {
-        std::cerr << " Usage : test_gen_backpack_yaml [calib_dataset_folder] [output_folder] [device_id]\n";
+        std::cerr << " Usage : test_gen_backpack_yaml [calib_dataset_folder] [output_folder] [device_id] [cam_num]\n";
         return -1;
     }
 
@@ -1031,6 +1054,9 @@ int main(int argc, char* argv[]) {
     std::string output_folder = argv[2];
     std::string device_id = argv[3];
     std::string backpack_device_name = "backpack"+device_id;
+    int cam_num = 4;
+    if (argc == 5)
+      cam_num = std::stoi(argv[4]);
 
     // extrinsic files
     std::string lidar0_2_lidar1_filepath = common::concatenateFolderAndFileName(input_folder, "lidar0_to_lidar1.yml");
@@ -1038,17 +1064,19 @@ int main(int argc, char* argv[]) {
     std::string cam0_2_cam1_filepath = common::concatenateFolderAndFileName(input_folder, "camera0_to_camera1.yml");
     std::string cam0_2_cam2_filepath = common::concatenateFolderAndFileName(input_folder, "camera0_to_camera2.yml");
     std::string cam0_2_cam3_filepath = common::concatenateFolderAndFileName(input_folder, "camera0_to_camera3.yml");
+    std::string cam0_2_cam4_filepath = common::concatenateFolderAndFileName(input_folder, "camera0_to_camera4.yml");
     std::string cam0_2_imu_filepath = common::concatenateFolderAndFileName(input_folder, "camera0_to_imu.yaml");
     // intrinsic files
     std::string cam0_intrin_filepath = common::concatenateFolderAndFileName(input_folder, "cam0.yml");
     std::string cam1_intrin_filepath = common::concatenateFolderAndFileName(input_folder, "cam1.yml");
     std::string cam2_intrin_filepath = common::concatenateFolderAndFileName(input_folder, "cam2.yml");
     std::string cam3_intrin_filepath = common::concatenateFolderAndFileName(input_folder, "cam3.yml");
+    std::string cam4_intrin_filepath = common::concatenateFolderAndFileName(input_folder, "cam4.yml");
     std::string imu_intrin_filepath = common::concatenateFolderAndFileName(input_folder, backpack_device_name+"_imu.yaml");
 
-    std::string output_filepath =  common::concatenateFolderAndFileName(output_folder, "raw_backpack.yaml");
+    std::string output_filepath =  common::concatenateFolderAndFileName(output_folder, "raw_" + backpack_device_name +".yaml");
 
-    MonoCamParam cam0, cam1, cam2, cam3;
+    MonoCamParam cam0, cam1, cam2, cam3, cam4;
     MonoIMUParam cam0_imu;
     bool sts = loadMonoCamParam(cam0_intrin_filepath, cam0, "");
     if (!sts){
@@ -1069,6 +1097,13 @@ int main(int argc, char* argv[]) {
     if (!sts){
         LOG(ERROR) << "Fail to parse cam3 intrinsic file and extrinsic file " << cam3_intrin_filepath << ", " << cam0_2_cam3_filepath;
         return -1;
+    }
+    if (cam_num == 5) {
+        sts = loadMonoCamParam(cam4_intrin_filepath, cam4, cam0_2_cam4_filepath);
+        if (!sts){
+            LOG(ERROR) << "Fail to parse cam4 intrinsic file and extrinsic file " << cam4_intrin_filepath << ", " << cam0_2_cam4_filepath;
+            return -1;
+        }
     }
     // load cam2imu extrinsic
     // sts = loadMonoIMUExtFileKalibr(cam0_2_imu_filepath, cam0_imu);
@@ -1100,7 +1135,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
     // define imu frame as body frame
-    sts = writeYAMLOutputFile(output_filepath, cam0, cam1, cam2, cam3,
+    sts = writeYAMLOutputFile(output_filepath, cam0, cam1, cam2, cam3, cam4,
                             cam0_imu, T_lidar0_lidar1, T_lidar1_cam0, std::stoi(device_id));
     if (!sts) {
         LOG(ERROR) << " Fail to write " << output_filepath << "\n";

@@ -137,9 +137,9 @@ if __name__ == "__main__":
     time_start = time.time()
 
     ############################ run cctag detection #########################
-    # cctag_sample_exe = '/code/CCTag/build/src/applications/detection'
+    cctag_sample_exe = '/code/CCTag/build/src/applications/detection'
     # cctag_sample_exe = '/usr/local/bin/detection'
-    cctag_sample_exe = '/home/ziqianbai/Projects/vlab/CCTag/build/src/applications/detection'
+    # cctag_sample_exe = '/home/ziqianbai/Projects/vlab/CCTag/build/src/applications/detection'
     # test_detect_cctag <input_img_folder> <result_filepath> <detection_exe_path>
     if cam_num == '1':
         detect_result_file = os.path.join(output_folder, 'cam'+str(cam0_idx)+'_cctag_result.yaml')
