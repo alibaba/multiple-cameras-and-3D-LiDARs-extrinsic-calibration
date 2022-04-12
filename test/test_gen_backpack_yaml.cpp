@@ -259,7 +259,7 @@ struct MonoCamParam {
  *
  */
 struct MonoIMUParam {
-  // cam0 2 imu
+  // transform point from cam0 frame to imu frame
   Eigen::Matrix4d T_cam0_imu;
 
   // acc bias(m/s^2)
@@ -513,6 +513,7 @@ bool loadMonoIMUExtFileKalibr(const std::string& kalib_result_file,
 
 
   YAML::Node cam0_node = root_node["cam0"];
+  // T_imu_cam0
   Eigen::Matrix4d extrinsic = Eigen::Matrix4d::Identity();
   for (size_t i = 0; i < cam0_node["T_cam_imu"].size(); ++i) {
     extrinsic(i, 0) = cam0_node["T_cam_imu"][i][0].as<double>();
@@ -521,7 +522,7 @@ bool loadMonoIMUExtFileKalibr(const std::string& kalib_result_file,
     extrinsic(i, 3) = cam0_node["T_cam_imu"][i][3].as<double>();
   }
 
-  monocam_imu_param.T_cam0_imu = extrinsic;
+  monocam_imu_param.T_cam0_imu = extrinsic.inverse();
   std::cout << "[loadMonoIMUExtFileKalibr] camera-IMU : \n"
             << extrinsic << "\n";
   return true;
@@ -1107,11 +1108,14 @@ int main(int argc, char* argv[]) {
     }
     // load cam2imu extrinsic
     // sts = loadMonoIMUExtFileKalibr(cam0_2_imu_filepath, cam0_imu);
-    sts = common::loadExtFileOpencv(cam0_2_imu_filepath, cam0_imu.T_cam0_imu);
+    Eigen::Matrix4d T_imu_cam0 = Eigen::Matrix4d::Identity();
+    sts = common::loadExtFileOpencv(cam0_2_imu_filepath, T_imu_cam0);
     if (!sts) {
           LOG(ERROR) << " Fail to read "<< cam0_2_imu_filepath;
           return -1;
     }
+    cam0_imu.T_cam0_imu = T_imu_cam0.inverse();
+
     // load imu intrinsic parameters
     sts = loadIMUIntrinFileKalibr(imu_intrin_filepath, cam0_imu);
     if (!sts) {
