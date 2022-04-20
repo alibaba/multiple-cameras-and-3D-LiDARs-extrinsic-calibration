@@ -44,7 +44,7 @@ bool loadRawImuData(const std::string &imu_filepath, imu::AllanGyr *gyr_x_ptr, i
         unsigned long long timestamp;
         double acc_x, acc_y, acc_z;
         double gyro_x, gyro_y, gyro_z;
-        ss_data >> timestamp >> acc_x >> acc_y >> acc_z >> gyro_x >> gyro_y >> gyro_z;
+        ss_data >> timestamp >> gyro_x >> gyro_y >> gyro_z >> acc_x >> acc_y >> acc_z;
         // std::cout << "timestamp: " << std::setprecision(9) << timestamp << ", " << acc_x << ", " << acc_y << ", " << acc_z << ", " << gyro_x << ", " << gyro_y << ", " << gyro_z << "\n";
         long double time = timestamp / k_tms_unit;
         // double time = std::round(time_tmp * 1000) / 1000.0;
@@ -288,17 +288,17 @@ int main(int argc, char **argv)
 
     std::cout << "Gyro X " << std::endl;
     imu::FitAllanGyr fit_gyr_x(gyro_v_x, gyro_ts_x, gyr_x->getFreq());
-    std::cout << "  bias " << gyr_x->getAvgValue() / 3600 << " degree/s" << std::endl;
+    std::cout << "  bias " << gyr_x->getAvgValue() / 3600 *M_PI/180 << " rad/s" << std::endl;
     std::cout << "-------------------" << std::endl;
 
     std::cout << "Gyro y " << std::endl;
     imu::FitAllanGyr fit_gyr_y(gyro_v_y, gyro_ts_y, gyr_y->getFreq());
-    std::cout << "  bias " << gyr_y->getAvgValue() / 3600 << " degree/s" << std::endl;
+    std::cout << "  bias " << gyr_y->getAvgValue() / 3600 *M_PI/180 << " rad/s" << std::endl;
     std::cout << "-------------------" << std::endl;
 
     std::cout << "Gyro z " << std::endl;
     imu::FitAllanGyr fit_gyr_z(gyro_v_z, gyro_ts_z, gyr_z->getFreq());
-    std::cout << "  bias " << gyr_z->getAvgValue() / 3600 << " degree/s" << std::endl;
+    std::cout << "  bias " << gyr_z->getAvgValue() / 3600 *M_PI/180 << " rad/s" << std::endl;
     std::cout << "-------------------" << std::endl;
 
     std::vector<double> gyro_sim_d_x = fit_gyr_x.calcSimDeviation(gyro_ts_x);

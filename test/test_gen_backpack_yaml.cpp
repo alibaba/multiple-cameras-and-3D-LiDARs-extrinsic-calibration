@@ -522,7 +522,7 @@ bool loadMonoIMUExtFileKalibr(const std::string& kalib_result_file,
     extrinsic(i, 3) = cam0_node["T_cam_imu"][i][3].as<double>();
   }
 
-  monocam_imu_param.T_cam0_imu = extrinsic.inverse();
+  monocam_imu_param.T_cam0_imu = extrinsic;
   std::cout << "[loadMonoIMUExtFileKalibr] camera-IMU : \n"
             << extrinsic << "\n";
   return true;
@@ -894,6 +894,7 @@ bool writeYAMLOutputFile(const std::string& file_name, const MonoCamParam& cam0,
     root_node["camera_1"] = camera1_node;
     root_node["camera_2"] = camera2_node;
     root_node["camera_3"] = camera3_node;
+    root_node["camera_4"] = camera4_node;
     root_node["horizon_lidar"] = lidar0_node;
     root_node["vertical_lidar"] = lidar1_node;
     root_node["imu_config"] = imu_node;
@@ -1108,13 +1109,11 @@ int main(int argc, char* argv[]) {
     }
     // load cam2imu extrinsic
     // sts = loadMonoIMUExtFileKalibr(cam0_2_imu_filepath, cam0_imu);
-    Eigen::Matrix4d T_imu_cam0 = Eigen::Matrix4d::Identity();
-    sts = common::loadExtFileOpencv(cam0_2_imu_filepath, T_imu_cam0);
+    sts = common::loadExtFileOpencv(cam0_2_imu_filepath, cam0_imu.T_cam0_imu);
     if (!sts) {
           LOG(ERROR) << " Fail to read "<< cam0_2_imu_filepath;
           return -1;
     }
-    cam0_imu.T_cam0_imu = T_imu_cam0.inverse();
 
     // load imu intrinsic parameters
     sts = loadIMUIntrinFileKalibr(imu_intrin_filepath, cam0_imu);
