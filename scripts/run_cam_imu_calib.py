@@ -34,8 +34,14 @@ def copyAndRenameCamData(raw_cam_folder, img_list, out_cam_folder):
         src_img_path = os.path.join(raw_cam_folder, img_name)
         img_idx = re.split(delim_pattern, img_name)[1]
         img_extension = re.split(delim_pattern, img_name)[2]
-        dst_img_path = os.path.join(out_cam_folder, img_tms[img_idx] + '.' + img_extension)
-
+        
+        test_time_shift = False
+        if test_time_shift :
+            new_time = str(long(img_tms[img_idx]) + long(1e9 * -0.10315333412639649))
+            dst_img_path = os.path.join(out_cam_folder, new_time + '.' + img_extension)
+        else:
+            dst_img_path = os.path.join(out_cam_folder, img_tms[img_idx] + '.' + img_extension)
+        
         shutil.copyfile(src_img_path, dst_img_path)
 
 def copyAndRenameImuData(raw_imu_file, out_imu_file):
@@ -133,7 +139,7 @@ def calibCamImuExt(data_folder, output_folder, target_filepath, imu_yaml_file, c
     # rename result files
     res_report_filepath = glob.glob(os.path.join(res_folder, '*.pdf'))[0]
     dst_report_filepath = os.path.join(res_folder, 'camera' + str(cam0_idx) + '_to_imu.pdf')
-    res_yaml_filepath = glob.glob(os.path.join(res_folder, '*.yaml'))[0]
+    res_yaml_filepath = glob.glob(os.path.join(res_folder, 'camchain*'))[0]
     dst_yaml_filepath = os.path.join(res_folder, 'camera' + str(cam0_idx) + '_to_imu.yaml')
     res_txt_filepath = glob.glob(os.path.join(res_folder, '*.txt'))[0]
     dst_txt_filepath = os.path.join(res_folder, 'camera' + str(cam0_idx) + '_to_imu.txt')
@@ -155,6 +161,24 @@ def readCamImuExtFileKalir(filename):
         T_ext[2, :4] = np.array(ext_node[2])
         T_ext[3, :4] = np.array(ext_node[3])
     return T_ext
+
+# read time_offset from kalibr yaml file
+def readCamImuTimeOffsetKalir(filename):
+    with open(filename, 'r') as fr:
+        root_node = yaml.load(fr)
+        time_offset = root_node['cam0']['timeshift_cam_imu']
+    return time_offset
+
+def evalTimeOffset(T_offset_list):
+    assert len(T_offset_list)
+    time_offsets = np.array(T_offset_list)
+    time_offset_mean = np.mean(time_offsets)
+    time_offset_delta = time_offsets - time_offset_mean
+    time_offset_norm = np.linalg.norm(time_offset_delta)
+    print('########################################################')
+    print('time offset = : {} '.format(time_offsets))
+    print('mean time offset = : {}, delta time offset norm: {}'.format(time_offset_mean, time_offset_norm))
+    return time_offset_mean
 
 def evalExtrinsics(T_cam_imu_list):
     
@@ -246,23 +270,25 @@ if __name__ == "__main__":
     raw_data_folder_list = glob.glob(os.path.join(dataset_folder, 'data*'))
     assert(len(raw_data_folder_list))
     # calibration results
-    T_cam_imu_list = []
+    T_cam_imu_list, Time_offset_list = [], []
     round_cnt = 0
     for folder in raw_data_folder_list:
         data_folder = os.path.join(folder, 'cam_imu')
         res_folder = os.path.join(data_folder, 'kalibr')
         T_cam_imu_file = calibCamImuExt(data_folder, res_folder, target_filepath, imu_yaml_file, cam_chain_yaml_file, img_extension, b_show_extract, cam_type, cam0_idx, cam1_idx)
+        print("Read info from : {}".format(T_cam_imu_file))
         T_ext = readCamImuExtFileKalir(T_cam_imu_file)
+        Time_offset = readCamImuTimeOffsetKalir(T_cam_imu_file)
         T_cam_imu_list.append(T_ext)
-        
+        Time_offset_list.append(Time_offset)
         round_cnt += 1
         timing_info.append(('Round {} calibration of cam-imu'.format(round_cnt), time.time() - time_start))
         time_start = time.time()
 
-
+    avg_time_offset = evalTimeOffset(Time_offset_list)
     T_avg = evalExtrinsics(T_cam_imu_list)
     avg_res_filepath = os.path.join(output_folder, 'camera'+ str(cam0_idx)+'_to_imu.yaml')
-    mv3dhelper.saveExtFileOpencv(avg_res_filepath, T_avg)
+    mv3dhelper.saveExtFileOpencv(avg_res_filepath, T_avg, avg_time_offset)
 
     print('------------------------------')
     for info in timing_info:

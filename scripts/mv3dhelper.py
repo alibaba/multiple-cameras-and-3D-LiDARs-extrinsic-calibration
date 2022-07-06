@@ -356,12 +356,13 @@ class SpotMetaItem:
             string_line += ' ' + ' '.join(str(x) for x in self.rectify_pose)
         return string_line
 
-def saveExtFileOpencv(filename, T_ext):
+def saveExtFileOpencv(filename, T_ext, time_offset):
     fs = cv.FileStorage(filename, cv.FileStorage_WRITE)
     R = T_ext[:3, :3]
     t = T_ext[:3, 3]
     fs.write('extrinsic_rotation', R)
     fs.write('extrinsic_translation', t)
+    fs.write('timeshift_cam_imu', time_offset)
     fs.release()
     return True
 
