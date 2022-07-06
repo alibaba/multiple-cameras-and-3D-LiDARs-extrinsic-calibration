@@ -1,0 +1,10 @@
+file:
+  ply_path: /home/rars13/Downloads/2022-06-30/063shatian.ply
+  tag_result_path: ../config/apriltag_20220630_SHATIAN.yaml
+detector:
+  tag_size: 0.32
+  mode: auto # auto or manual
+  detect_angle: 10.0
+  display_result: True
+  filter_ply: True
+
