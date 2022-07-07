@@ -6,7 +6,9 @@ import argparse
 import mv3dhelper
 import zrpc
 import time
-
+import numpy as np
+from scipy.spatial.transform import Rotation
+import cv2
 
 def help_information():
     print('Usage: python run_multicam_extrin_calib.py <workspace_folder> <dataset_folder> <cam_num> <output_folder> ')
@@ -30,6 +32,23 @@ def merge_undist_cam_folders(undist_cam_folder_list, merged_undist_cams_folder):
             merged_undist_cams_folder, 'spot0_'+str(cam_idx)+'.jpg')
         shutil.copy(src_img_path, dst_img_path)
 
+def evalMultiCamExtrinsics(multicam_calib_result):
+    
+    for trans_name in multicam_calbi_result.keys():
+        print("Eval {}".format(trans_name))
+        extrinsics = multicam_calbi_result[trans_name]
+        assert len(extrinsics)
+        T_baseline = np.linalg.inv(extrinsics[0])
+        for T_ext in extrinsics[1:]:
+            delta_T = T_baseline.dot(T_ext)
+            delta_R = delta_T[:3, :3]
+            delta_t = delta_T[:3, 3]
+            rot_vec = Rotation.from_dcm(delta_R).as_rotvec()
+            rot_vec_norm = np.linalg.norm(rot_vec)
+            t_norm = np.linalg.norm(delta_t)
+            print('########################################################')
+            print('delta rotation angle: {}, delta translation norm: {}'.format(np.rad2deg(rot_vec_norm), t_norm))
+        print('########################################################')
 
 if __name__ == "__main__":
 
@@ -42,8 +61,10 @@ if __name__ == "__main__":
                         help='the input dataset folder')
     parser.add_argument('cam_num', type=str, default='mono',
                         help="the camera number: [1, 2, 4, 5]")
-    parser.add_argument('output_folder', type=str, default='',
+    parser.add_argument('output_folder', type=str, default='multi_cam_calib',
                         help='the folder of output files')
+    parser.add_argument("--multi_scene", type=bool, default=True,
+                        help="if True, will find dataset_folder/data* and processe sequentially, else will process dataset_folder")
     parser.add_argument('--target_type', type=str,
                         default='cctag', help='target type')
     parser.add_argument('--extension', type=str, default='.jpg',
@@ -68,11 +89,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     ws_folder = args.ws_folder
     dataset_folder = args.dataset_folder
-    output_folder = args.output_folder
+    output_folder_name = args.output_folder
     # extension of image
     img_extension = args.extension
     b_show_result = args.show_result
-    cam_num = args.cam_num
+    cam_num = args.cam_num  
     # image prefix under cam0 and cam1 folder
     cam0_idx = args.cam0_idx
     cam1_idx = args.cam1_idx
@@ -90,129 +111,155 @@ if __name__ == "__main__":
         print('Invalid target type {}'.format(args.target_type))
         exit(-1)
 
-    # raw image folder path
-    raw_cam_folder_list = [os.path.join(dataset_folder, 'cam0'), os.path.join(
-        dataset_folder, 'cam1'), os.path.join(dataset_folder, 'cam2'), os.path.join(dataset_folder, 'cam3'), 
-        os.path.join(dataset_folder, 'cam4')]
-
-    mv3dhelper.create_folder_if_not_exists(output_folder)
-
-    # exe path
-    img_undist_exe = os.path.join(ws_folder, 'build/test_undist_img')
-    cctag_detect_exe = os.path.join(ws_folder, 'build/test_detect_cctag')
-    if args.cam_num == '1':
-        cam_calib_exe = os.path.join(ws_folder, 'build/test_mono_calibration')
-    elif args.cam_num == '2':
-        cam_calib_exe = os.path.join(ws_folder, 'build/test_stereo_calibration')
-    elif args.cam_num == '4':
-        cam_calib_exe = os.path.join(ws_folder, 'build/test_teche_calibration')
-    elif args.cam_num == '5':
-        cam_calib_exe = os.path.join(ws_folder, 'build/test_ladybug_calibration')
+    if args.multi_scene:
+        raw_data_folder_list = glob.glob(os.path.join(dataset_folder, 'data*'))
     else:
-        print('Invalid camera number {}'.format(args.cam_num))
-        exit(-1)
+        raw_data_folder_list = [dataset_folder]
+        
+    print("ladybug scene data = ", raw_data_folder_list)
+    for data_folder in raw_data_folder_list:
+        # get ladybug path
+        data_folder = os.path.join(data_folder, "cams/ladybug")
+        output_folder = os.path.join(data_folder, output_folder_name)
+        print("Process ", data_folder)
+        # raw image folder path
+        raw_cam_folder_list = [os.path.join(data_folder, 'cam0'), os.path.join(
+            data_folder, 'cam1'), os.path.join(data_folder, 'cam2'), os.path.join(data_folder, 'cam3'), 
+            os.path.join(data_folder, 'cam4')]
+        
+        mv3dhelper.create_folder_if_not_exists(output_folder)
 
-    time_start = time.time()
-    timing_info = []
-    ################################## undistort image #################################
-    undist_cam_folder_list = [os.path.join(output_folder, 'undist_cam0'), os.path.join(
-        output_folder, 'undist_cam1'), os.path.join(output_folder, 'undist_cam2'), os.path.join(output_folder, 'undist_cam3'),
-        os.path.join(output_folder, 'undist_cam4')]
-    for f in undist_cam_folder_list:
-        if os.path.exists(f):
-            shutil.rmtree(f)
-
-    focal_scale = 1.0
-    for idx in range(0, int(cam_num)):
-        raw_cam_folder = raw_cam_folder_list[idx]
-        undist_cam_folder = undist_cam_folder_list[idx]
-        cam_int_file = cam_intrin_filelist[idx]
-        cmds = [img_undist_exe, raw_cam_folder,
-                cam_int_file, undist_cam_folder, focal_scale]
-        print(cmds)
-        if zrpc.map([cmds])[1] == 0:
+        # exe path
+        img_undist_exe = os.path.join(ws_folder, 'build/test_undist_img')
+        cctag_detect_exe = os.path.join(ws_folder, 'build/test_detect_cctag')
+        if args.cam_num == '1':
+            cam_calib_exe = os.path.join(ws_folder, 'build/test_mono_calibration')
+        elif args.cam_num == '2':
+            cam_calib_exe = os.path.join(ws_folder, 'build/test_stereo_calibration')
+        elif args.cam_num == '4':
+            cam_calib_exe = os.path.join(ws_folder, 'build/test_teche_calibration')
+        elif args.cam_num == '5':
+            cam_calib_exe = os.path.join(ws_folder, 'build/test_ladybug_calibration')
+        else:
+            print('Invalid camera number {}'.format(args.cam_num))
             exit(-1)
 
-    timing_info.append(('Generate undistorted images', time.time() - time_start))
-    time_start = time.time()
+        time_start = time.time()
+        timing_info = []
+        ################################## undistort image #################################
+        undist_cam_folder_list = [os.path.join(output_folder, 'undist_cam0'), os.path.join(
+            output_folder, 'undist_cam1'), os.path.join(output_folder, 'undist_cam2'), os.path.join(output_folder, 'undist_cam3'),
+            os.path.join(output_folder, 'undist_cam4')]
+        for f in undist_cam_folder_list:
+            if os.path.exists(f):
+                shutil.rmtree(f)
 
-    ############################ run cctag detection #########################
-    cctag_sample_exe = '/code/CCTag/build/src/applications/detection'
-    # cctag_sample_exe = '/usr/local/bin/detection'
-    # cctag_sample_exe = '/home/ziqianbai/Projects/vlab/CCTag/build/src/applications/detection'
-    # test_detect_cctag <input_img_folder> <result_filepath> <detection_exe_path>
-    if cam_num == '1':
-        detect_result_file = os.path.join(output_folder, 'cam'+str(cam0_idx)+'_cctag_result.yaml')
-        cmds = [cctag_detect_exe, undist_cam_folder_list[cam0_idx],
-                detect_result_file, cctag_sample_exe]
-        print(cmds)
-        if zrpc.map([cmds])[1] == 0:
-            exit(-1)
-    elif cam_num == '2':
-        cam0_result_file = os.path.join(output_folder, 'cam'+str(cam0_idx)+'_cctag_result.yaml')
-        cmds = [cctag_detect_exe, undist_cam_folder_list[cam0_idx],
-                cam0_result_file, cctag_sample_exe]
-        print(cmds)
-        if zrpc.map([cmds])[1] == 0:
-            exit(-1)
-        cam1_result_file = os.path.join(output_folder, 'cam'+str(cam1_idx)+'_cctag_result.yaml')
-        cmds = [cctag_detect_exe, undist_cam_folder_list[cam1_idx],
-                cam1_result_file, cctag_sample_exe]
-        print(cmds)
-        if zrpc.map([cmds])[1] == 0:
-            exit(-1)
-    elif cam_num == '4' or cam_num == '5':
-        merged_cams_folder = os.path.join(output_folder, 'undist_cams')
-        merge_undist_cam_folders(undist_cam_folder_list[:int(cam_num)], merged_cams_folder)
+        focal_scale = 1.0
+        for idx in range(0, int(cam_num)):
+            raw_cam_folder = raw_cam_folder_list[idx]
+            undist_cam_folder = undist_cam_folder_list[idx]
+            cam_int_file = cam_intrin_filelist[idx]
+            cmds = [img_undist_exe, raw_cam_folder,
+                    cam_int_file, undist_cam_folder, focal_scale]
+            print(cmds)
+            if zrpc.map([cmds])[1] == 0:
+                exit(-1)
 
-        detect_result_file = os.path.join(output_folder, 'cams_cctag_result.yaml')
-        cmds = [cctag_detect_exe, merged_cams_folder,
-                detect_result_file, cctag_sample_exe]
-        print(cmds)
-        if zrpc.map([cmds])[1] == 0:
-            exit(-1)
+        timing_info.append(('Generate undistorted images', time.time() - time_start))
+        time_start = time.time()
+
+        ############################ run cctag detection #########################
+        cctag_sample_exe = '/code/CCTag/build/src/applications/detection'
+        # cctag_sample_exe = '/usr/local/bin/detection'
+        # cctag_sample_exe = '/home/ziqianbai/Projects/vlab/CCTag/build/src/applications/detection'
+        # test_detect_cctag <input_img_folder> <result_filepath> <detection_exe_path>
+        if cam_num == '1':
+            detect_result_file = os.path.join(output_folder, 'cam'+str(cam0_idx)+'_cctag_result.yaml')
+            cmds = [cctag_detect_exe, undist_cam_folder_list[cam0_idx],
+                    detect_result_file, cctag_sample_exe]
+            print(cmds)
+            if zrpc.map([cmds])[1] == 0:
+                exit(-1)
+        elif cam_num == '2':
+            cam0_result_file = os.path.join(output_folder, 'cam'+str(cam0_idx)+'_cctag_result.yaml')
+            cmds = [cctag_detect_exe, undist_cam_folder_list[cam0_idx],
+                    cam0_result_file, cctag_sample_exe]
+            print(cmds)
+            if zrpc.map([cmds])[1] == 0:
+                exit(-1)
+            cam1_result_file = os.path.join(output_folder, 'cam'+str(cam1_idx)+'_cctag_result.yaml')
+            cmds = [cctag_detect_exe, undist_cam_folder_list[cam1_idx],
+                    cam1_result_file, cctag_sample_exe]
+            print(cmds)
+            if zrpc.map([cmds])[1] == 0:
+                exit(-1)
+        elif cam_num == '4' or cam_num == '5':
+            merged_cams_folder = os.path.join(output_folder, 'undist_cams')
+            merge_undist_cam_folders(undist_cam_folder_list[:int(cam_num)], merged_cams_folder)
+
+            detect_result_file = os.path.join(output_folder, 'cams_cctag_result.yaml')
+            cmds = [cctag_detect_exe, merged_cams_folder,
+                    detect_result_file, cctag_sample_exe]
+            print(cmds)
+            if zrpc.map([cmds])[1] == 0:
+                exit(-1)
+        
+        timing_info.append(('Detect cctag on images', time.time() - time_start))
+        time_start = time.time()
+
+        ########################### calibrate extrinsics between multi-cameras ######################
+        # undistorted intrinsic file of each camera
+        undist_cam_intrin_filelist = []
+        for idx in range(0, int(cam_num)):
+            if os.path.exists(undist_cam_folder_list[idx]):
+                undist_cam_intrin = glob.glob(os.path.join(undist_cam_folder_list[idx], '*.y*ml'))[0]
+                undist_cam_intrin_filelist.append(undist_cam_intrin)
+
+        if cam_num == '1':
+            # test_mono_calibration [global_map.yaml] [cctag_result.yaml][cam0_intrin_file] [output_folder]
+            cmds = [cam_calib_exe, target_filepath, detect_result_file, undist_cam_intrin_filelist[cam0_idx], output_folder]
+            print(cmds)
+            if zrpc.map([cmds])[1] == 0:
+                exit(-1)
+        elif cam_num == '2':
+            # test_stereo_calibration [global_map.yaml] [cam0_cctag_result.yaml] [cam1_cctag_result.yaml] [cam0_intrin_file] [cam1_intrin_file] [flag_calibrate_hik_teche] [output_folder]
+            calib_hetercam_flag = 0
+            cmds = [cam_calib_exe, target_filepath, cam0_result_file, cam1_result_file, undist_cam_intrin_filelist[cam0_idx], undist_cam_intrin_filelist[cam1_idx], calib_hetercam_flag, output_folder]
+            print(cmds)
+            if zrpc.map([cmds])[1] == 0:
+                exit(-1)
+        elif cam_num == '4':
+            # test_techecalibrator [global_map.yaml] [cctag_result.yaml][cam0_intrin_file] [cam1_intrin_file] [cam2_intrin_file] [cam3_intrin_file][output_folder]
+            cmds = [cam_calib_exe, target_filepath, detect_result_file, undist_cam_intrin_filelist[0], 
+            undist_cam_intrin_filelist[1], undist_cam_intrin_filelist[2], undist_cam_intrin_filelist[3], output_folder]
+            print(cmds)
+            if zrpc.map([cmds])[1] == 0:
+                exit(-1)
+        elif cam_num == '5':
+            # test_ladybugcalibrator [global_map.yaml] [cctag_result.yaml] [cam0_intrin_file] [cam1_intrin_file] [cam2_intrin_file] [cam3_intrin_file] [cam4_intrin_file] [output_folder]
+            cmds = [cam_calib_exe, target_filepath, detect_result_file, undist_cam_intrin_filelist[0], 
+            undist_cam_intrin_filelist[1], undist_cam_intrin_filelist[2], undist_cam_intrin_filelist[3], undist_cam_intrin_filelist[4], output_folder]
+            print(cmds)
+            if zrpc.map([cmds])[1] == 0:
+                exit(-1)
+
+        timing_info.append(('Calibrate multicams', time.time() - time_start))
+        print('------------------------------')
+        for info in timing_info:
+            print('| %s: %0.3f second(s)' % (info[0], info[1]))
+        print('------------------------------')
+
+    # Reload MultiCam Calib result
+    multicam_calbi_result = {}
+    for i in range(int(cam_num)-1):
+        if "T_cam0_to_cam{idx}".format(idx=i+1) not in multicam_calbi_result.keys():
+            multicam_calbi_result["T_cam0_to_cam{idx}".format(idx=i+1)] = []
+        for data_folder in raw_data_folder_list:
+            calib_yml_path = os.path.join(data_folder, "cams/ladybug", output_folder_name, "camera0_to_camera{idx}.yml".format(idx=i+1))
+            calib_yml_result = cv2.FileStorage(calib_yml_path, cv2.FILE_STORAGE_READ)
+            T = np.eye(4)
+            T[:3,:3] = calib_yml_result.getNode("extrinsic_rotation").mat()
+            T[:3,3] = calib_yml_result.getNode("extrinsic_translation").mat()[0]
+            multicam_calbi_result["T_cam0_to_cam{idx}".format(idx=i+1)].append(T)
     
-    timing_info.append(('Detect cctag on images', time.time() - time_start))
-    time_start = time.time()
-
-    ########################### calibrate extrinsics between multi-cameras ######################
-    # undistorted intrinsic file of each camera
-    undist_cam_intrin_filelist = []
-    for idx in range(0, int(cam_num)):
-        if os.path.exists(undist_cam_folder_list[idx]):
-            undist_cam_intrin = glob.glob(os.path.join(undist_cam_folder_list[idx], '*.y*ml'))[0]
-            undist_cam_intrin_filelist.append(undist_cam_intrin)
-
-    if cam_num == '1':
-        # test_mono_calibration [global_map.yaml] [cctag_result.yaml][cam0_intrin_file] [output_folder]
-        cmds = [cam_calib_exe, target_filepath, detect_result_file, undist_cam_intrin_filelist[cam0_idx], output_folder]
-        print(cmds)
-        if zrpc.map([cmds])[1] == 0:
-            exit(-1)
-    elif cam_num == '2':
-        # test_stereo_calibration [global_map.yaml] [cam0_cctag_result.yaml] [cam1_cctag_result.yaml] [cam0_intrin_file] [cam1_intrin_file] [flag_calibrate_hik_teche] [output_folder]
-        calib_hetercam_flag = 0
-        cmds = [cam_calib_exe, target_filepath, cam0_result_file, cam1_result_file, undist_cam_intrin_filelist[cam0_idx], undist_cam_intrin_filelist[cam1_idx], calib_hetercam_flag, output_folder]
-        print(cmds)
-        if zrpc.map([cmds])[1] == 0:
-            exit(-1)
-    elif cam_num == '4':
-        # test_techecalibrator [global_map.yaml] [cctag_result.yaml][cam0_intrin_file] [cam1_intrin_file] [cam2_intrin_file] [cam3_intrin_file][output_folder]
-        cmds = [cam_calib_exe, target_filepath, detect_result_file, undist_cam_intrin_filelist[0], 
-        undist_cam_intrin_filelist[1], undist_cam_intrin_filelist[2], undist_cam_intrin_filelist[3], output_folder]
-        print(cmds)
-        if zrpc.map([cmds])[1] == 0:
-            exit(-1)
-    elif cam_num == '5':
-        # test_ladybugcalibrator [global_map.yaml] [cctag_result.yaml] [cam0_intrin_file] [cam1_intrin_file] [cam2_intrin_file] [cam3_intrin_file] [cam4_intrin_file] [output_folder]
-        cmds = [cam_calib_exe, target_filepath, detect_result_file, undist_cam_intrin_filelist[0], 
-        undist_cam_intrin_filelist[1], undist_cam_intrin_filelist[2], undist_cam_intrin_filelist[3], undist_cam_intrin_filelist[4], output_folder]
-        print(cmds)
-        if zrpc.map([cmds])[1] == 0:
-            exit(-1)
-
-    timing_info.append(('Calibrate multicams', time.time() - time_start))
-    print('------------------------------')
-    for info in timing_info:
-        print('| %s: %0.3f second(s)' % (info[0], info[1]))
-    print('------------------------------')
+    evalMultiCamExtrinsics(multicam_calbi_result)
