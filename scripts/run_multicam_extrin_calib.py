@@ -63,6 +63,8 @@ if __name__ == "__main__":
                         help="the camera number: [1, 2, 4, 5]")
     parser.add_argument('output_folder', type=str, default='multi_cam_calib',
                         help='the folder of output files')
+    parser.add_argument("--multi_scene", type=bool, default=True,
+                        help="if True, will find dataset_folder/data* and processe sequentially, else will process dataset_folder")
     parser.add_argument('--target_type', type=str,
                         default='cctag', help='target type')
     parser.add_argument('--extension', type=str, default='.jpg',
@@ -109,7 +111,11 @@ if __name__ == "__main__":
         print('Invalid target type {}'.format(args.target_type))
         exit(-1)
 
-    raw_data_folder_list = glob.glob(os.path.join(dataset_folder, 'data*'))
+    if args.multi_scene:
+        raw_data_folder_list = glob.glob(os.path.join(dataset_folder, 'data*'))
+    else:
+        raw_data_folder_list = [dataset_folder]
+        
     print("ladybug scene data = ", raw_data_folder_list)
     for data_folder in raw_data_folder_list:
         # get ladybug path

@@ -14,6 +14,13 @@ enum class target_type_t
     CCTAG = 2
 };
 
+
+typedef struct AprilTag
+{
+   int tag_id;
+   std::vector<Eigen::Vector3d> corners;
+}AprilTag;
+
 class TargetBoard
 {
 public:
@@ -26,13 +33,16 @@ public:
     ~TargetBoard(){};
 
     std::vector<Eigen::Vector3d> objectPoints() const;
-
+    std::vector<AprilTag> objectAprilTags() const;
+    target_type_t objectTargetType() const;
 private:
     bool loadCCTAGObjPoints(const std::string &file_name);
     bool loadAprilTagObjPoints(const std::string &file_name);
     bool loadChessboardObjPoints(const std::string &file_name);
-
+    
+    target_type_t target_type;
     std::vector<Eigen::Vector3d> v_object_points_;
+    std::vector<AprilTag> v_obj_points_apriltag_;
 };
 
 } // namespace target

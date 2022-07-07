@@ -180,7 +180,7 @@ class PlyAprilTagDetector:
             vis.get_view_control().convert_from_pinhole_camera_parameters(camera_params)
             cam_trans = np.eye(4)
             euler_ang[1] += math.pi *2 / 360
-            cam_trans[2,3] = 1
+            cam_trans[2,3] = 1.0
             cam_trans[:3,:3] = eulerAnglesToRotationMatrix(euler_ang)
             camera_params.extrinsic = cam_trans @ world2cam
             vis.poll_events()
