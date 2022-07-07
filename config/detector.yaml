@@ -4,7 +4,8 @@ file:
 detector:
   tag_size: 0.32
   mode: auto # auto or manual
+  look_around_height: 1.0
   detect_angle: 10.0
   display_result: True
   filter_ply: True
-
+  filter_dist: 0.6

@@ -62,6 +62,7 @@ class PlyAprilTagDetector:
         self.tags_geo = []
         self.win_width = 1280
         self.win_height = 720
+        self.filter_dist = config["detector"]["filter_dist"]
         if ply is not None:
             self.ply = ply
 
@@ -180,7 +181,7 @@ class PlyAprilTagDetector:
             vis.get_view_control().convert_from_pinhole_camera_parameters(camera_params)
             cam_trans = np.eye(4)
             euler_ang[1] += math.pi *2 / 360
-            cam_trans[2,3] = 1.0
+            cam_trans[2,3] = 1
             cam_trans[:3,:3] = eulerAnglesToRotationMatrix(euler_ang)
             camera_params.extrinsic = cam_trans @ world2cam
             vis.poll_events()
@@ -252,7 +253,7 @@ class PlyAprilTagDetector:
         vis = o3d.visualization.O3DVisualizer("Open3D - 3D Text", 1024, 768)
         vis.show_settings = True
         if filter_ply:
-            self.filter_pointcloud()
+            self.filter_pointcloud(self.filter_dist)
             vis.add_geometry("scene_ply", self.filtered_ply)
         else:
             vis.add_geometry("scene_ply", self.ply)
@@ -313,15 +314,15 @@ class PlyAprilTagDetector:
 
 if __name__ == "__main__":
 
-    with open('../config/detector.yaml') as f:
+    with open('detector/detector.yaml') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
     
     pcd = o3d.io.read_point_cloud(config["file"]["ply_path"])
     detecter = PlyAprilTagDetector(config, tag_size=config["detector"]["tag_size"], ply=pcd)
     if config["detector"]["mode"] == "auto":
-        detecter.traverse_ply(detect_angle_inv=config["detector"]["detect_angle"])
+        detecter.traverse_ply(look_around_hegiht=config["detector"]["look_around_hegiht"], detect_angle_inv=config["detector"]["detect_angle"])
     elif config["detector"]["mode"] == "manual":
-        detecter.manual_traverse_ply()
+        detecter.manual_traverse_ply(look_around_hegiht=config["detector"]["look_around_hegiht"])
     else:
         print("Error mode (auto or manual)!")
 
