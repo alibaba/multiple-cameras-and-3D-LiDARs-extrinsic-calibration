@@ -9,7 +9,7 @@ namespace target
 
 TargetBoard::TargetBoard(const std::string &file_name, target_type_t modelType)
 {
-    target_type = modelType;
+    target_type_ = modelType;
     if (target_type_t::CCTAG == modelType)
     {
         if (!loadCCTAGObjPoints(file_name))
@@ -197,7 +197,7 @@ std::vector<AprilTag> TargetBoard::objectAprilTags() const
 
 target_type_t TargetBoard::objectTargetType() const
 {
-    return target_type;
+    return target_type_;
 }
 
 } // namespace target

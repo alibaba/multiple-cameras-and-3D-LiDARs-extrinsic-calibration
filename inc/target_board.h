@@ -40,7 +40,7 @@ private:
     bool loadAprilTagObjPoints(const std::string &file_name);
     bool loadChessboardObjPoints(const std::string &file_name);
     
-    target_type_t target_type;
+    target_type_t target_type_;
     std::vector<Eigen::Vector3d> v_object_points_;
     std::vector<AprilTag> v_obj_points_apriltag_;
 };
