@@ -54,7 +54,9 @@ Docker build:
 docker/build
 ```
 
-Run docker with outr test data, please refer to [docker_usage_en.md](./docker_usage_en.md).
+We have built a public docker image beforehand, please download the [archived file](https://drive.google.com/file/d/1WqkYovHSsb4BI_V_soT5umzXNUleR3RB/view?usp=share_link) if you need.
+
+Run docker with our test data, please refer to [docker_usage_en.md](./docker_usage_en.md).
 
 
 
@@ -70,7 +72,7 @@ Run docker with outr test data, please refer to [docker_usage_en.md](./docker_us
    make -j8
    ```
    
-2. Download the [test data](https://drive.google.com/file/d/1aaWk44UUGWs6tE-ATOtT1qy7E_eiUQUu/view?usp=sharing).
+2. Download the [test data](https://drive.google.com/file/d/1Cv0FGCFS3pz7H1yHeFi5lkA2ZzCAYpYk/view?usp=share_link).
 
 3. Build the source code in docker, refer to [docker_useage_en.md](./docker_usage_en.md) for further tutorial.
 

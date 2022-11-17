@@ -10,7 +10,7 @@ Based on the  **Single-Shot Calibration**,  we implement several python scripts 
 * Camera-LiDAR extrinsic calibration;
 * LiDAR-IMU extrinsic calibration; (TODO)
 
-The Calibration workflow has strict requirements on calibration data catalog and file format, please refer to [test data](https://drive.google.com/file/d/1aaWk44UUGWs6tE-ATOtT1qy7E_eiUQUu/view?usp=sharing).
+The Calibration workflow has strict requirements on calibration data catalog and file format, please refer to [test data](https://drive.google.com/file/d/1Cv0FGCFS3pz7H1yHeFi5lkA2ZzCAYpYk/view?usp=share_link).
 ​
 
 **The Calibration Workflow**
@@ -27,7 +27,11 @@ The Calibration workflow has strict requirements on calibration data catalog and
 
 
 ### 1. Pull docker image 
-Before run the Docker image, we need to configure the local X server to map the physical display into container. 
+
+We have built a public docker image beforehand, please download the [archived file](https://drive.google.com/file/d/1WqkYovHSsb4BI_V_soT5umzXNUleR3RB/view?usp=share_link) if you need.
+
+Before run the Docker image, we need to configure the local X server to map the physical display into container.
+
 **linux**:
 
 ```bash
